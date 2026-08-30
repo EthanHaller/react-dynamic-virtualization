@@ -6,12 +6,32 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["React", "ReactJs", "Virtual", "Virtualization", "List", "Dynamic", "Size", "Change", "Over", "Time", "Infinite", "Scroll", "Load More"],
+  "keywords": [
+    "React",
+    "ReactJs",
+    "Virtual",
+    "Virtualization",
+    "List",
+    "Dynamic",
+    "Size",
+    "Change",
+    "Over",
+    "Time",
+    "Infinite",
+    "Scroll",
+    "Load More"
+  ],
   "author": "Ethan Haller",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EthanHaller/react-dynamic-virtualization.git"
   },
   "type": "module",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18"
+  }
 }
