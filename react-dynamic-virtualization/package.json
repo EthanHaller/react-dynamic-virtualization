@@ -1,0 +1,17 @@
+{
+  "name": "react-dynamic-virtualization",
+  "version": "1.0.0",
+  "description": "React list virtualization for items whose size can change over time.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["React", "ReactJs", "Virtual", "Virtualization", "List", "Dynamic", "Size", "Change", "Over", "Time", "Infinite", "Scroll", "Load More"],
+  "author": "Ethan Haller",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EthanHaller/react-dynamic-virtualization.git"
+  },
+  "type": "module",
+  "license": "MIT"
+}
