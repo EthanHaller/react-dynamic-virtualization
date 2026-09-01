@@ -1,16 +1,28 @@
 import { useCallback } from "react"
 import { useMeasuredItem } from "../hooks/useMeasuredHeight"
+import { setMeasuredHeight } from "../cache/measurementCache"
 
-export function VirtualizedListItem({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-	const onSizeChange = useCallback((height: number) => {
-		console.log(height)
-	}, [])
+type VirtualizedListItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  itemId: string
+}
 
-	const ref = useMeasuredItem(onSizeChange)
+export function VirtualizedListItem({
+  children,
+  itemId,
+  ...props
+}: VirtualizedListItemProps) {
+  const onSizeChange = useCallback(
+    (height: number) => {
+      setMeasuredHeight(itemId, height)
+    },
+    [itemId],
+  )
 
-	return (
-		<div ref={ref} {...props}>
-			{children}
-		</div>
-	)
+  const ref = useMeasuredItem(onSizeChange)
+
+  return (
+    <div ref={ref} {...props}>
+      {children}
+    </div>
+  )
 }
