@@ -1,7 +1,9 @@
 const cache = new Map<string, number>()
 
-export function getMeasuredHeight(id: string): number | undefined {
-  return cache.get(id)
+const DEFAULT_ITEM_HEIGHT = 50
+
+export function getMeasuredHeight(id: string): number {
+  return cache.get(id) ?? DEFAULT_ITEM_HEIGHT
 }
 
 export function setMeasuredHeight(id: string, height: number): void {

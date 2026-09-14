@@ -1,10 +1,7 @@
-import { useCallback, useMemo, useReducer, useRef, useState } from "react"
-
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react"
 import { getMeasuredHeight, setMeasuredHeight } from "../cache/measurementCache"
-import { PositionTree } from "../position/positionTree"
-import { useResizeObserver } from "../hooks/useResizeObserver"
-
-const DEFAULT_ITEM_HEIGHT = 50
+import { useMeasuredItems } from "../hooks/useMeasuredItems"
+import { usePositionStore } from "../hooks/usePositionStore"
 
 type RenderItemOptions = {
   ref: (element: HTMLDivElement | null) => void
@@ -26,79 +23,29 @@ export function VirtualizedList<T>({
   overscan = 2,
   renderItem,
 }: VirtualizedListProps<T>) {
-  const [, forceRender] = useReducer((value) => value + 1, 0)
   const [scrollTop, setScrollTop] = useState(0)
 
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
-  const positionTree = useMemo(
-    () =>
-      new PositionTree(
-        itemIds,
-        (itemId) => getMeasuredHeight(itemId) ?? DEFAULT_ITEM_HEIGHT,
-      ),
-    [itemIds],
-  )
+  const positionStore = usePositionStore(itemIds)
+  useSyncExternalStore(positionStore.subscribe, positionStore.getSnapshot)
 
-  const positionTreeRef = useRef(positionTree)
-  positionTreeRef.current = positionTree
-
-  const itemIdByElement = useRef(new Map<HTMLDivElement, string>())
-
-  const handleResize = useCallback((entries: ResizeObserverEntry[]) => {
-    let changed = false
-
-    for (const entry of entries) {
-      const element = entry.target as HTMLDivElement
-      const itemId = itemIdByElement.current.get(element)
-
-      if (itemId === undefined) {
-        continue
-      }
-
-      const newHeight = entry.contentRect.height
-      const oldHeight = getMeasuredHeight(itemId) ?? DEFAULT_ITEM_HEIGHT
+  const handleMeasure = useCallback(
+    (itemId: string, newHeight: number) => {
+      const oldHeight = getMeasuredHeight(itemId)
 
       if (newHeight === oldHeight) {
-        continue
+        return
       }
 
       setMeasuredHeight(itemId, newHeight)
 
-      positionTreeRef.current.updateHeight(itemId, newHeight - oldHeight)
-
-      changed = true
-    }
-
-    if (changed) {
-      forceRender()
-    }
-  }, [])
-
-  const { observe, unobserve } = useResizeObserver(handleResize)
-
-  const setItemRef = useCallback(
-    (itemId: string) => (element: HTMLDivElement | null) => {
-      if (element === null) {
-        for (const [
-          existingElement,
-          existingItemId,
-        ] of itemIdByElement.current) {
-          if (existingItemId === itemId) {
-            unobserve(existingElement)
-            itemIdByElement.current.delete(existingElement)
-            break
-          }
-        }
-
-        return
-      }
-
-      itemIdByElement.current.set(element, itemId)
-      observe(element)
+      positionStore.updateHeight(itemId, newHeight - oldHeight)
     },
-    [observe, unobserve],
+    [positionStore],
   )
+
+  const { getItemRef } = useMeasuredItems(handleMeasure)
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(event.currentTarget.scrollTop)
@@ -116,9 +63,8 @@ export function VirtualizedList<T>({
     )
   }
 
-  const firstVisibleIndex = positionTree.getIndexAtPosition(scrollTop)
-
-  const lastVisibleIndex = positionTree.getIndexAtPosition(
+  const firstVisibleIndex = positionStore.getIndexAtPosition(scrollTop)
+  const lastVisibleIndex = positionStore.getIndexAtPosition(
     scrollTop + height - 1,
   )
 
@@ -126,7 +72,6 @@ export function VirtualizedList<T>({
     0,
     (firstVisibleIndex === -1 ? 0 : firstVisibleIndex) - overscan,
   )
-
   const lastIndex = Math.min(
     items.length - 1,
     (lastVisibleIndex === -1 ? items.length - 1 : lastVisibleIndex) + overscan,
@@ -137,11 +82,11 @@ export function VirtualizedList<T>({
   for (let index = firstIndex; index <= lastIndex; index++) {
     const item = items[index]
     const itemId = itemIds[index]
-    const position = positionTree.getPosition(itemId)
+    const position = positionStore.getPosition(itemId)
 
     renderedItems.push(
       renderItem(item, {
-        ref: setItemRef(itemId),
+        ref: getItemRef(itemId),
         style: {
           position: "absolute",
           top: 0,
@@ -164,7 +109,7 @@ export function VirtualizedList<T>({
     >
       <div
         style={{
-          height: positionTree.getTotalHeight(),
+          height: positionStore.getTotalHeight(),
           position: "relative",
         }}
       >
