@@ -1,9 +1,6 @@
 import { useMemo } from "react"
-
-import { getMeasuredHeight } from "../cache/measurementCache"
+import { DEFAULT_ITEM_HEIGHT, getMeasuredHeight } from "../cache/measurementCache"
 import { PositionStore } from "../position/positionStore"
-
-const DEFAULT_ITEM_HEIGHT = 50
 
 export function usePositionStore(itemIds: string[]): PositionStore {
   return useMemo(

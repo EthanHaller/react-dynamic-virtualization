@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react"
-import { getMeasuredHeight, setMeasuredHeight } from "../cache/measurementCache"
+import { DEFAULT_ITEM_HEIGHT, getMeasuredHeight, setMeasuredHeight } from "../cache/measurementCache"
 import { useMeasuredItems } from "../hooks/useMeasuredItems"
 import { usePositionStore } from "../hooks/usePositionStore"
 
@@ -32,7 +32,7 @@ export function VirtualizedList<T>({
 
   const handleMeasure = useCallback(
     (itemId: string, newHeight: number) => {
-      const oldHeight = getMeasuredHeight(itemId)
+      const oldHeight = getMeasuredHeight(itemId) ?? DEFAULT_ITEM_HEIGHT
 
       if (newHeight === oldHeight) {
         return
