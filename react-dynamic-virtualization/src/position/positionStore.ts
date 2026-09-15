@@ -9,7 +9,7 @@ export class PositionStore {
     this.positionTree = new PositionTree(itemIds, getHeight)
   }
 
-  subscribe(listener: () => void): () => void {
+  subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener)
 
     return () => {
@@ -17,7 +17,7 @@ export class PositionStore {
     }
   }
 
-  getSnapshot(): number {
+  getSnapshot = (): number => {
     return this.version
   }
 
