@@ -26,10 +26,13 @@ export function useMeasuredItems(
 
     observerRef.current = observer
 
+    for (const element of elementByItemId.current.values()) {
+      observer.observe(element)
+    }
+
     return () => {
       observer.disconnect()
       observerRef.current = null
-
       itemIdByElement.current.clear()
       elementByItemId.current.clear()
     }
