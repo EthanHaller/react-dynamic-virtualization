@@ -1,4 +1,6 @@
 import "./App.css"
+import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
+import { useSandboxConfig } from "./config/useSandboxConfig"
 
 const scenarios = [
   "Basic",
@@ -9,6 +11,8 @@ const scenarios = [
 ]
 
 function App() {
+  const { config, updateConfig, resetConfig } = useSandboxConfig()
+
   return (
     <div className="app">
       <header className="app-header">
@@ -47,6 +51,12 @@ function App() {
             <div className="panel-header">
               <h2>Configuration</h2>
             </div>
+
+            <ConfigurationPanel
+              config={config}
+              updateConfig={updateConfig}
+              resetConfig={resetConfig}
+            />
           </aside>
         </div>
 

@@ -114,3 +114,34 @@
     min-height: 240px;
   }
 }
+
+.configuration-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.control-label {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.control input,
+.control select {
+  width: 100%;
+  height: 2rem;
+  padding: 0 var(--space-2);
+}
+
+.configuration-content > button {
+  height: 2rem;
+  margin-top: var(--space-2);
+}
