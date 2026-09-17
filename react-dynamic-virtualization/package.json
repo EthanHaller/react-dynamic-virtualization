@@ -1,18 +1,19 @@
 {
   "name": "react-dynamic-virtualization",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "React list virtualization for items whose size can change over time.",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "files": [
     "dist"
   ],
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:typecheck": "tsc --noEmit -p tsconfig.test.json",
-    "build": "tsc --noEmit && vite build"
+    "build": "vite build && tsc"
   },
   "keywords": [
     "React",
