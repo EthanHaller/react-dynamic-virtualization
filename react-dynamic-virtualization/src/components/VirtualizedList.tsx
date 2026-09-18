@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react"
-import { DEFAULT_ITEM_HEIGHT, getMeasuredHeight, setMeasuredHeight } from "../cache/measurementCache"
+
 import { useMeasuredItems } from "../hooks/useMeasuredItems"
 import { usePositionStore } from "../hooks/usePositionStore"
 
@@ -28,19 +28,15 @@ export function VirtualizedList<T>({
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
   const positionStore = usePositionStore(itemIds)
-  useSyncExternalStore(positionStore.subscribe, positionStore.getSnapshot)
+
+  const positionSnapshot = useSyncExternalStore(
+    positionStore.subscribe,
+    positionStore.getSnapshot,
+  )
 
   const handleMeasure = useCallback(
     (itemId: string, newHeight: number) => {
-      const oldHeight = getMeasuredHeight(itemId) ?? DEFAULT_ITEM_HEIGHT
-
-      if (newHeight === oldHeight) {
-        return
-      }
-
-      setMeasuredHeight(itemId, newHeight)
-
-      positionStore.updateHeight(itemId, newHeight - oldHeight)
+      positionStore.updateHeight(itemId, newHeight)
     },
     [positionStore],
   )
@@ -63,8 +59,9 @@ export function VirtualizedList<T>({
     )
   }
 
-  const firstVisibleIndex = positionStore.getIndexAtPosition(scrollTop)
-  const lastVisibleIndex = positionStore.getIndexAtPosition(
+  const firstVisibleIndex = positionSnapshot.getIndexAtPosition(scrollTop)
+
+  const lastVisibleIndex = positionSnapshot.getIndexAtPosition(
     scrollTop + height - 1,
   )
 
@@ -72,6 +69,7 @@ export function VirtualizedList<T>({
     0,
     (firstVisibleIndex === -1 ? 0 : firstVisibleIndex) - overscan,
   )
+
   const lastIndex = Math.min(
     items.length - 1,
     (lastVisibleIndex === -1 ? items.length - 1 : lastVisibleIndex) + overscan,
@@ -82,7 +80,7 @@ export function VirtualizedList<T>({
   for (let index = firstIndex; index <= lastIndex; index++) {
     const item = items[index]
     const itemId = itemIds[index]
-    const position = positionStore.getPosition(itemId)
+    const position = positionSnapshot.getPosition(itemId)
 
     renderedItems.push(
       renderItem(item, {
@@ -109,7 +107,7 @@ export function VirtualizedList<T>({
     >
       <div
         style={{
-          height: positionStore.getTotalHeight(),
+          height: positionSnapshot.getTotalHeight(),
           position: "relative",
         }}
       >

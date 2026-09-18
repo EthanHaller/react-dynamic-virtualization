@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useLayoutEffect, useRef } from "react"
 
 export function useMeasuredItems(
   onMeasure: (itemId: string, height: number) => void,
@@ -10,7 +10,7 @@ export function useMeasuredItems(
 
   const observerRef = useRef<ResizeObserver | null>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const element = entry.target as HTMLDivElement

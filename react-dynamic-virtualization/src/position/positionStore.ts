@@ -1,12 +1,31 @@
 import { PositionTree } from "./positionTree"
 
+const DEFAULT_ITEM_HEIGHT = 50
+
+export type PositionSnapshot = {
+  getPosition: (itemId: string) => number
+  getIndexAtPosition: (position: number) => number
+  getTotalHeight: () => number
+}
+
 export class PositionStore {
+  private readonly itemHeights: Map<string, number>
   private readonly positionTree: PositionTree
   private readonly listeners = new Set<() => void>()
-  private version = 0
 
-  constructor(itemIds: string[], getHeight: (itemId: string) => number) {
-    this.positionTree = new PositionTree(itemIds, getHeight)
+  private snapshot: PositionSnapshot
+
+  constructor(itemIds: string[]) {
+    this.itemHeights = new Map(
+      itemIds.map((itemId) => [itemId, DEFAULT_ITEM_HEIGHT]),
+    )
+
+    this.positionTree = new PositionTree(
+      itemIds,
+      itemIds.map(() => DEFAULT_ITEM_HEIGHT),
+    )
+
+    this.snapshot = this.createSnapshot()
   }
 
   subscribe = (listener: () => void): (() => void) => {
@@ -17,32 +36,40 @@ export class PositionStore {
     }
   }
 
-  getSnapshot = (): number => {
-    return this.version
+  getSnapshot = (): PositionSnapshot => {
+    return this.snapshot
   }
 
-  updateHeight(itemId: string, heightDifference: number): void {
-    if (heightDifference === 0) {
+  updateHeight(itemId: string, newHeight: number): void {
+    const oldHeight = this.itemHeights.get(itemId)
+
+    if (oldHeight === undefined) {
+      throw new Error(`Unknown itemId: ${itemId}`)
+    }
+
+    if (newHeight === oldHeight) {
       return
     }
 
-    this.positionTree.updateHeight(itemId, heightDifference)
-    this.version++
+    this.itemHeights.set(itemId, newHeight)
+
+    this.positionTree.updateHeight(itemId, newHeight - oldHeight)
+
+    this.snapshot = this.createSnapshot()
 
     for (const listener of this.listeners) {
       listener()
     }
   }
 
-  getPosition(itemId: string): number {
-    return this.positionTree.getPosition(itemId)
-  }
+  private createSnapshot(): PositionSnapshot {
+    return {
+      getPosition: (itemId: string) => this.positionTree.getPosition(itemId),
 
-  getIndexAtPosition(position: number): number {
-    return this.positionTree.getIndexAtPosition(position)
-  }
+      getIndexAtPosition: (position: number) =>
+        this.positionTree.getIndexAtPosition(position),
 
-  getTotalHeight(): number {
-    return this.positionTree.getTotalHeight()
+      getTotalHeight: () => this.positionTree.getTotalHeight(),
+    }
   }
 }

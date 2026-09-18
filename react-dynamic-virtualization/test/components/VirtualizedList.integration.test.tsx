@@ -1,10 +1,6 @@
 import { act, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import {
-  clearMeasurementCache,
-  getMeasuredHeight,
-} from "../../src/cache/measurementCache"
 import { VirtualizedList } from "../../src/components/VirtualizedList"
 import { MockResizeObserver } from "../mocks/resizeObserver"
 
@@ -55,7 +51,6 @@ function renderList(items: Item[]) {
 
 describe("VirtualizedList integration", () => {
   beforeEach(() => {
-    clearMeasurementCache()
     MockResizeObserver.reset()
   })
 
@@ -75,9 +70,11 @@ describe("VirtualizedList integration", () => {
     expect(item1).toHaveStyle({
       transform: "translateY(0px)",
     })
+
     expect(item2).toHaveStyle({
       transform: "translateY(50px)",
     })
+
     expect(item3).toHaveStyle({
       transform: "translateY(100px)",
     })
@@ -85,25 +82,61 @@ describe("VirtualizedList integration", () => {
     const sentinel = item1.parentElement
 
     expect(sentinel).not.toBeNull()
+
     expect(sentinel).toHaveStyle({
       height: "150px",
     })
 
     triggerResize(item1, 100)
 
-    expect(getMeasuredHeight("item-1")).toBe(100)
+    expect(item1).toHaveStyle({
+      transform: "translateY(0px)",
+    })
+
+    expect(item2).toHaveStyle({
+      transform: "translateY(100px)",
+    })
+
+    expect(item3).toHaveStyle({
+      transform: "translateY(150px)",
+    })
+
+    expect(sentinel).toHaveStyle({
+      height: "200px",
+    })
+  })
+
+  it("applies multiple initial height measurements", () => {
+    const items: Item[] = [
+      { id: "item-1", name: "Item 1" },
+      { id: "item-2", name: "Item 2" },
+      { id: "item-3", name: "Item 3" },
+    ]
+
+    renderList(items)
+
+    const item1 = screen.getByTestId("item-1")
+    const item2 = screen.getByTestId("item-2")
+    const item3 = screen.getByTestId("item-3")
+
+    triggerResize(item1, 100)
+    triggerResize(item2, 75)
+    triggerResize(item3, 125)
 
     expect(item1).toHaveStyle({
       transform: "translateY(0px)",
     })
+
     expect(item2).toHaveStyle({
       transform: "translateY(100px)",
     })
+
     expect(item3).toHaveStyle({
-      transform: "translateY(150px)",
+      transform: "translateY(175px)",
     })
-    expect(sentinel).toHaveStyle({
-      height: "200px",
+
+    expect(item1.parentElement).toHaveStyle({
+      height: "300px",
     })
   })
 
@@ -121,8 +154,11 @@ describe("VirtualizedList integration", () => {
     const observer = MockResizeObserver.instances[0]
 
     expect(observer.observe).toHaveBeenCalledTimes(3)
+
     expect(observer.observe).toHaveBeenCalledWith(screen.getByTestId("item-1"))
+
     expect(observer.observe).toHaveBeenCalledWith(screen.getByTestId("item-2"))
+
     expect(observer.observe).toHaveBeenCalledWith(screen.getByTestId("item-3"))
   })
 
@@ -148,6 +184,5 @@ describe("VirtualizedList integration", () => {
     expect(item2).toHaveStyle({
       transform: "translateY(75px)",
     })
-    expect(getMeasuredHeight("item-1")).toBe(75)
   })
 })
