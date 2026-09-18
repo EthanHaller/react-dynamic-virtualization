@@ -4,7 +4,11 @@ export class PositionTree {
   private readonly cumulativeHeights: number[]
   private totalHeight: number
 
-  constructor(itemIds: string[], getHeight: (itemId: string) => number) {
+  constructor(itemIds: string[], heights: number[]) {
+    if (itemIds.length !== heights.length) {
+      throw new Error("itemIds and heights must have the same length")
+    }
+
     this.itemIds = [...itemIds]
 
     this.itemIndexById = new Map(
@@ -20,7 +24,7 @@ export class PositionTree {
     this.totalHeight = 0
 
     for (let i = 0; i < this.itemIds.length; i++) {
-      const height = getHeight(this.itemIds[i])
+      const height = heights[i]
 
       this.cumulativeHeights[i + 1] = height
       this.totalHeight += height
