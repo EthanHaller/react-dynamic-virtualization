@@ -1,6 +1,7 @@
 import "./App.css"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
+import { BasicScenario } from "./scenarios/basic/BasicScenario"
 
 const scenarios = [
   "Basic",
@@ -44,7 +45,7 @@ function App() {
             <div className="panel-header">
               <h2>Experiment</h2>
             </div>
-            <div className="experiment-placeholder" />
+            <BasicScenario config={config} />
           </section>
 
           <aside className="panel configuration-panel">
