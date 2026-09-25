@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { SandboxConfig } from "../../config/types"
 import { createItemSizes, createItems } from "../../data"
@@ -7,9 +7,15 @@ import "./BasicScenario.css"
 
 type BasicScenarioProps = {
   config: SandboxConfig
+  onRenderedItemCountChange: (count: number) => void
 }
 
-export function BasicScenario({ config }: BasicScenarioProps) {
+export function BasicScenario({
+  config,
+  onRenderedItemCountChange,
+}: BasicScenarioProps) {
+  const renderedItems = useRef(new Set<string>())
+
   const items = useMemo(() => createItems(config.itemCount), [config.itemCount])
 
   const itemSizes = useMemo(
@@ -30,6 +36,16 @@ export function BasicScenario({ config }: BasicScenarioProps) {
     ],
   )
 
+  function handleItemRef(itemId: string, element: HTMLDivElement | null) {
+    if (element) {
+      renderedItems.current.add(itemId)
+    } else {
+      renderedItems.current.delete(itemId)
+    }
+
+    onRenderedItemCountChange(renderedItems.current.size)
+  }
+
   return (
     <div className="basic-scenario">
       <VirtualizedList
@@ -39,10 +55,12 @@ export function BasicScenario({ config }: BasicScenarioProps) {
         overscan={config.overscan}
         renderItem={(item, { ref, style }) => (
           <BasicItem
-            key={item.id}
             item={item}
             height={itemSizes[item.index]}
-            ref={ref}
+            ref={(element) => {
+              ref(element)
+              handleItemRef(item.id, element)
+            }}
             style={style}
           />
         )}
