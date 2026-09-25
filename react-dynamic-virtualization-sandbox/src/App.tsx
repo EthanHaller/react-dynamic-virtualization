@@ -1,4 +1,6 @@
 import "./App.css"
+import { useState } from "react"
+import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
 import { BasicScenario } from "./scenarios/basic/BasicScenario"
@@ -12,6 +14,7 @@ const scenarios = [
 ]
 
 function App() {
+  const [renderedItemCount, setRenderedItemCount] = useState(0)
   const { config, updateConfig, resetConfig } = useSandboxConfig()
 
   return (
@@ -45,7 +48,10 @@ function App() {
             <div className="panel-header">
               <h2>Experiment</h2>
             </div>
-            <BasicScenario config={config} />
+            <BasicScenario
+              config={config}
+              onRenderedItemCountChange={setRenderedItemCount}
+            />{" "}
           </section>
 
           <aside className="panel configuration-panel">
@@ -61,11 +67,10 @@ function App() {
           </aside>
         </div>
 
-        <section className="panel diagnostics-panel">
-          <div className="panel-header">
-            <h2>Diagnostics</h2>
-          </div>
-        </section>
+        <DiagnosticsPanel
+          config={config}
+          renderedItemCount={renderedItemCount}
+        />
       </main>
     </div>
   )
