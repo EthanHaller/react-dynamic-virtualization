@@ -1,3 +1,5 @@
+import { memo } from "react"
+
 export type RenderItemOptions = {
   ref: (element: HTMLDivElement | null) => void
   style: React.CSSProperties
@@ -30,4 +32,4 @@ function VirtualizedListItem<T>({
   })
 }
 
-export default VirtualizedListItem
+export default memo(VirtualizedListItem) as typeof VirtualizedListItem
