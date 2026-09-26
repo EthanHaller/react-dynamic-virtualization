@@ -1,12 +1,8 @@
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react"
-
+import { useCallback, useMemo, useState } from "react"
+import { usePositions } from "../hooks/usePositions"
 import { useMeasuredItems } from "../hooks/useMeasuredItems"
-import { usePositionStore } from "../hooks/usePositionStore"
-
-type RenderItemOptions = {
-  ref: (element: HTMLDivElement | null) => void
-  style: React.CSSProperties
-}
+import VirtualizedListItem from "./VirtualizedListItem"
+import type { RenderItemOptions } from "./VirtualizedListItem"
 
 type VirtualizedListProps<T> = {
   items: T[]
@@ -24,15 +20,9 @@ export function VirtualizedList<T>({
   renderItem,
 }: VirtualizedListProps<T>) {
   const [scrollTop, setScrollTop] = useState(0)
-
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
-  const positionStore = usePositionStore(itemIds)
-
-  const positionSnapshot = useSyncExternalStore(
-    positionStore.subscribe,
-    positionStore.getSnapshot,
-  )
+  const { positionStore, positionSnapshot } = usePositions(itemIds)
 
   const handleMeasure = useCallback(
     (itemId: string, newHeight: number) => {
@@ -60,7 +50,6 @@ export function VirtualizedList<T>({
   }
 
   const firstVisibleIndex = positionSnapshot.getIndexAtPosition(scrollTop)
-
   const lastVisibleIndex = positionSnapshot.getIndexAtPosition(
     scrollTop + height - 1,
   )
@@ -69,32 +58,41 @@ export function VirtualizedList<T>({
     0,
     (firstVisibleIndex === -1 ? 0 : firstVisibleIndex) - overscan,
   )
-
   const lastIndex = Math.min(
     items.length - 1,
     (lastVisibleIndex === -1 ? items.length - 1 : lastVisibleIndex) + overscan,
   )
 
-  const renderedItems = []
+  const renderedItems = useMemo(() => {
+    const renderedItems = []
 
-  for (let index = firstIndex; index <= lastIndex; index++) {
-    const item = items[index]
-    const itemId = itemIds[index]
-    const position = positionSnapshot.getPosition(itemId)
+    for (let index = firstIndex; index <= lastIndex; index++) {
+      const item = items[index]
+      const itemId = itemIds[index]
+      const position = positionSnapshot.getPosition(itemId)
 
-    renderedItems.push(
-      renderItem(item, {
-        ref: getItemRef(itemId),
-        style: {
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          transform: `translateY(${position}px)`,
-        },
-      }),
-    )
-  }
+      renderedItems.push(
+        <VirtualizedListItem
+          key={itemId}
+          item={item}
+          itemId={itemId}
+          position={position}
+          getItemRef={getItemRef}
+          renderItem={renderItem}
+        />,
+      )
+    }
+
+    return renderedItems
+  }, [
+    firstIndex,
+    lastIndex,
+    items,
+    itemIds,
+    positionSnapshot,
+    getItemRef,
+    renderItem,
+  ])
 
   return (
     <div
