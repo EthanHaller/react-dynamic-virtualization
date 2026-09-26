@@ -36,27 +36,6 @@ export function ConfigurationPanel({
       />
 
       <NumberInput
-        label="Item size"
-        value={config.itemSize}
-        min={1}
-        onChange={(value) => updateConfig("itemSize", value)}
-      />
-
-      <NumberInput
-        label="Min size"
-        value={config.minItemSize}
-        min={1}
-        onChange={(value) => updateConfig("minItemSize", value)}
-      />
-
-      <NumberInput
-        label="Max size"
-        value={config.maxItemSize}
-        min={1}
-        onChange={(value) => updateConfig("maxItemSize", value)}
-      />
-
-      <NumberInput
         label="Overscan"
         value={config.overscan}
         min={0}

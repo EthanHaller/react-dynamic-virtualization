@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { SandboxConfig } from "../../config/types"
-import { createItemSizes, createItems } from "../../data"
+import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
 import "./BasicScenario.css"
 
@@ -17,24 +17,6 @@ export function BasicScenario({
   const renderedItems = useRef(new Set<string>())
 
   const items = useMemo(() => createItems(config.itemCount), [config.itemCount])
-
-  const itemSizes = useMemo(
-    () =>
-      createItemSizes({
-        count: config.itemCount,
-        sizing: config.itemSizing,
-        fixedSize: config.itemSize,
-        minSize: config.minItemSize,
-        maxSize: config.maxItemSize,
-      }),
-    [
-      config.itemCount,
-      config.itemSizing,
-      config.itemSize,
-      config.minItemSize,
-      config.maxItemSize,
-    ],
-  )
 
   function handleItemRef(itemId: string, element: HTMLDivElement | null) {
     if (element) {
@@ -56,7 +38,6 @@ export function BasicScenario({
         renderItem={(item, { ref, style }) => (
           <BasicItem
             item={item}
-            height={itemSizes[item.index]}
             ref={(element) => {
               ref(element)
               handleItemRef(item.id, element)
@@ -71,21 +52,13 @@ export function BasicScenario({
 
 type BasicItemProps = {
   item: SandboxItem
-  height: number
   ref: React.Ref<HTMLDivElement>
   style: React.CSSProperties
 }
 
-function BasicItem({ item, height, ref, style }: BasicItemProps) {
+function BasicItem({ item, ref, style }: BasicItemProps) {
   return (
-    <div
-      ref={ref}
-      className="basic-item"
-      style={{
-        ...style,
-        height,
-      }}
-    >
+    <div ref={ref} className="basic-item" style={style}>
       <div className="basic-item-content">
         <span className="basic-item-index">#{item.index}</span>
         <span>{item.content}</span>

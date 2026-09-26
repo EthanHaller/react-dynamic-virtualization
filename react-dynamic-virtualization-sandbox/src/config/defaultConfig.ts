@@ -6,6 +6,6 @@ export const defaultConfig: SandboxConfig = {
   itemSize: 80,
   minItemSize: 40,
   maxItemSize: 160,
-  overscan: 5,
+  overscan: 2,
   listHeight: 500,
 }
