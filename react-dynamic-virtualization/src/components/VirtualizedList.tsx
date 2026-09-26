@@ -63,36 +63,24 @@ export function VirtualizedList<T>({
     (lastVisibleIndex === -1 ? items.length - 1 : lastVisibleIndex) + overscan,
   )
 
-  const renderedItems = useMemo(() => {
-    const renderedItems = []
+  const renderedItems = []
 
-    for (let index = firstIndex; index <= lastIndex; index++) {
-      const item = items[index]
-      const itemId = itemIds[index]
-      const position = positionSnapshot.getPosition(itemId)
+  for (let index = firstIndex; index <= lastIndex; index++) {
+    const item = items[index]
+    const itemId = itemIds[index]
+    const position = positionSnapshot.getPosition(itemId)
 
-      renderedItems.push(
-        <VirtualizedListItem
-          key={itemId}
-          item={item}
-          itemId={itemId}
-          position={position}
-          getItemRef={getItemRef}
-          renderItem={renderItem}
-        />,
-      )
-    }
-
-    return renderedItems
-  }, [
-    firstIndex,
-    lastIndex,
-    items,
-    itemIds,
-    positionSnapshot,
-    getItemRef,
-    renderItem,
-  ])
+    renderedItems.push(
+      <VirtualizedListItem
+        key={itemId}
+        item={item}
+        itemId={itemId}
+        position={position}
+        getItemRef={getItemRef}
+        renderItem={renderItem}
+      />,
+    )
+  }
 
   return (
     <div
