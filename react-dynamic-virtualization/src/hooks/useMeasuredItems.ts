@@ -7,8 +7,9 @@ export function useMeasuredItems(
 } {
   const itemIdByElement = useRef(new Map<HTMLDivElement, string>())
   const elementByItemId = useRef(new Map<string, HTMLDivElement>())
-
   const observerRef = useRef<ResizeObserver | null>(null)
+  const onMeasureRef = useRef(onMeasure)
+  onMeasureRef.current = onMeasure
 
   useLayoutEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -20,7 +21,7 @@ export function useMeasuredItems(
           continue
         }
 
-        onMeasure(itemId, entry.contentRect.height)
+        onMeasureRef.current(itemId, entry.contentRect.height)
       }
     })
 
