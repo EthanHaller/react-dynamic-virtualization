@@ -9,8 +9,8 @@ export type PositionSnapshot = {
 }
 
 export class PositionStore {
-  private readonly itemHeights: Map<string, number>
-  private readonly positionTree: PositionTree
+  private itemHeights: Map<string, number>
+  private positionTree: PositionTree
   private readonly listeners = new Set<() => void>()
 
   private snapshot: PositionSnapshot
@@ -55,6 +55,23 @@ export class PositionStore {
 
     this.positionTree.updateHeight(itemId, newHeight - oldHeight)
 
+    this.snapshot = this.createSnapshot()
+
+    for (const listener of this.listeners) {
+      listener()
+    }
+  }
+
+  setItemIds(itemIds: string[]): void {
+    const heights = itemIds.map(
+      (itemId) => this.itemHeights.get(itemId) ?? DEFAULT_ITEM_HEIGHT,
+    )
+
+    this.itemHeights = new Map(
+      itemIds.map((itemId, index) => [itemId, heights[index]]),
+    )
+
+    this.positionTree = new PositionTree(itemIds, heights)
     this.snapshot = this.createSnapshot()
 
     for (const listener of this.listeners) {
