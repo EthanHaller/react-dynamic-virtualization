@@ -7,6 +7,7 @@ type SelectInputProps<T extends string> = {
   label: string
   value: T
   options: SelectOption<T>[]
+  id: string
   onChange: (value: T) => void
 }
 
@@ -14,12 +15,15 @@ export function SelectInput<T extends string>({
   label,
   value,
   options,
+  id,
   onChange,
 }: SelectInputProps<T>) {
   return (
-    <label className="control">
+    <label className="control" htmlFor={id}>
       <span className="control-label">{label}</span>
       <select
+        id={id}
+        name={id}
         value={value}
         onChange={(event) => {
           onChange(event.target.value as T)

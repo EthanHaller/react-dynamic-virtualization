@@ -1,0 +1,37 @@
+.changing-sizes-scenario {
+  padding: var(--space-4);
+}
+
+.changing-size-item {
+  padding: var(--space-2);
+}
+
+.changing-size-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-panel);
+}
+
+.changing-size-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.changing-size-item-index,
+.changing-size-item-state {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+.changing-size-item-index {
+  color: var(--color-text-secondary);
+}
+
+.changing-size-item-state {
+  color: var(--color-accent);
+}

@@ -4,6 +4,7 @@ type NumberInputProps = {
   min?: number
   max?: number
   step?: number
+  id: string
   onChange: (value: number) => void
 }
 
@@ -13,12 +14,15 @@ export function NumberInput({
   min,
   max,
   step = 1,
+  id,
   onChange,
 }: NumberInputProps) {
   return (
-    <label className="control">
+    <label className="control" htmlFor={id}>
       <span className="control-label">{label}</span>
       <input
+        id={id}
+        name={id}
         type="number"
         value={value}
         min={min}
