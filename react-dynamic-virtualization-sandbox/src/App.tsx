@@ -4,6 +4,7 @@ import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
 import { BasicScenario } from "./scenarios/basic/BasicScenario"
+import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 
 const scenarios = [
   "Basic",
@@ -14,6 +15,7 @@ const scenarios = [
 ]
 
 function App() {
+  const [activeScenario, setActiveScenario] = useState("Basic")
   const [renderedItemCount, setRenderedItemCount] = useState(0)
   const { config, updateConfig, resetConfig } = useSandboxConfig()
 
@@ -32,11 +34,14 @@ function App() {
 
       <main className="app-main">
         <nav className="scenario-nav" aria-label="Scenarios">
-          {scenarios.map((scenario, index) => (
+          {scenarios.map((scenario) => (
             <button
               key={scenario}
-              className={`scenario-tab${index === 0 ? " active" : ""}`}
+              className={`scenario-tab${
+                activeScenario === scenario ? " active" : ""
+              }`}
               type="button"
+              onClick={() => setActiveScenario(scenario)}
             >
               {scenario}
             </button>
@@ -48,10 +53,19 @@ function App() {
             <div className="panel-header">
               <h2>Experiment</h2>
             </div>
-            <BasicScenario
-              config={config}
-              onRenderedItemCountChange={setRenderedItemCount}
-            />{" "}
+            {activeScenario === "Basic" && (
+              <BasicScenario
+                config={config}
+                onRenderedItemCountChange={setRenderedItemCount}
+              />
+            )}
+
+            {activeScenario === "Changing Sizes" && (
+              <ChangingSizesScenario
+                config={config}
+                onRenderedItemCountChange={setRenderedItemCount}
+              />
+            )}
           </section>
 
           <aside className="panel configuration-panel">

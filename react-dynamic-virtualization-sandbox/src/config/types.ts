@@ -8,4 +8,6 @@ export type SandboxConfig = {
   maxItemSize: number
   overscan: number
   listHeight: number
+  enableSizeChanges: boolean
+  changeInterval: number
 }
