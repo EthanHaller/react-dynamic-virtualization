@@ -5,6 +5,7 @@ import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
 import { BasicScenario } from "./scenarios/basic/BasicScenario"
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
+import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
 
 const scenarios = [
   "Basic",
@@ -62,6 +63,13 @@ function App() {
 
             {activeScenario === "Changing Sizes" && (
               <ChangingSizesScenario
+                config={config}
+                onRenderedItemCountChange={setRenderedItemCount}
+              />
+            )}
+
+            {activeScenario === "Mutations" && (
+              <MutationsScenario
                 config={config}
                 onRenderedItemCountChange={setRenderedItemCount}
               />

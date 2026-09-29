@@ -9,20 +9,23 @@ export type PositionSnapshot = {
 }
 
 export class PositionStore {
-  private itemHeights: Map<string, number>
+  private readonly itemHeights: Map<string, number>
   private positionTree: PositionTree
   private readonly listeners = new Set<() => void>()
 
   private snapshot: PositionSnapshot
 
-  constructor(itemIds: string[]) {
+  constructor(itemIds: string[], previousHeights?: Map<string, number>) {
     this.itemHeights = new Map(
-      itemIds.map((itemId) => [itemId, DEFAULT_ITEM_HEIGHT]),
+      itemIds.map((itemId) => [
+        itemId,
+        previousHeights?.get(itemId) ?? DEFAULT_ITEM_HEIGHT,
+      ]),
     )
 
     this.positionTree = new PositionTree(
       itemIds,
-      itemIds.map(() => DEFAULT_ITEM_HEIGHT),
+      itemIds.map((itemId) => this.itemHeights.get(itemId)!),
     )
 
     this.snapshot = this.createSnapshot()
@@ -40,6 +43,10 @@ export class PositionStore {
     return this.snapshot
   }
 
+  getHeights = (): Map<string, number> => {
+    return this.itemHeights
+  }
+
   updateHeight(itemId: string, newHeight: number): void {
     const oldHeight = this.itemHeights.get(itemId)
 
@@ -52,26 +59,7 @@ export class PositionStore {
     }
 
     this.itemHeights.set(itemId, newHeight)
-
     this.positionTree.updateHeight(itemId, newHeight - oldHeight)
-
-    this.snapshot = this.createSnapshot()
-
-    for (const listener of this.listeners) {
-      listener()
-    }
-  }
-
-  setItemIds(itemIds: string[]): void {
-    const heights = itemIds.map(
-      (itemId) => this.itemHeights.get(itemId) ?? DEFAULT_ITEM_HEIGHT,
-    )
-
-    this.itemHeights = new Map(
-      itemIds.map((itemId, index) => [itemId, heights[index]]),
-    )
-
-    this.positionTree = new PositionTree(itemIds, heights)
     this.snapshot = this.createSnapshot()
 
     for (const listener of this.listeners) {

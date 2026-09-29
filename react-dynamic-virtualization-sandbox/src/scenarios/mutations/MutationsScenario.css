@@ -1,0 +1,44 @@
+.mutations-scenario {
+  padding: var(--space-4);
+}
+
+.mutation-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.mutation-controls button {
+  height: 2rem;
+  padding: 0 var(--space-3);
+}
+
+.mutation-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.mutation-count {
+  margin-left: var(--space-2);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+.mutation-item-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-panel);
+}
+
+.mutation-item-index {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
