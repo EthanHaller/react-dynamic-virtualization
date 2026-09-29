@@ -2,10 +2,6 @@
   padding: var(--space-4);
 }
 
-.basic-item {
-  padding: var(--space-2);
-}
-
 .basic-item-content {
   display: flex;
   align-items: center;

@@ -2,10 +2,6 @@
   padding: var(--space-4);
 }
 
-.changing-size-item {
-  padding: var(--space-2);
-}
-
 .changing-size-item-content {
   display: flex;
   flex-direction: column;
