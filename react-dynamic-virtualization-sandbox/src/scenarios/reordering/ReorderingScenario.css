@@ -1,0 +1,37 @@
+.reordering-scenario {
+  padding: var(--space-4);
+}
+
+.reordering-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.reordering-controls button {
+  height: 2rem;
+  padding: 0 var(--space-3);
+}
+
+.reordering-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.reordering-item-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-panel);
+}
+
+.reordering-item-index {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}

@@ -6,12 +6,14 @@ import { useSandboxConfig } from "./config/useSandboxConfig"
 import { BasicScenario } from "./scenarios/basic/BasicScenario"
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
+import { ReorderingScenario } from "./scenarios/reordering/ReorderingScenario"
 
 const scenarios = [
   "Basic",
   "Dynamic Sizes",
   "Changing Sizes",
   "Mutations",
+  "Reordering",
   "Drag & Drop",
 ]
 
@@ -70,6 +72,13 @@ function App() {
 
             {activeScenario === "Mutations" && (
               <MutationsScenario
+                config={config}
+                onRenderedItemCountChange={setRenderedItemCount}
+              />
+            )}
+
+            {activeScenario === "Reordering" && (
+              <ReorderingScenario
                 config={config}
                 onRenderedItemCountChange={setRenderedItemCount}
               />
