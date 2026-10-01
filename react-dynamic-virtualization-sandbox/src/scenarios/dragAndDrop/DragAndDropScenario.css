@@ -1,0 +1,42 @@
+.drag-and-drop-scenario {
+  padding: var(--space-4);
+}
+
+.drag-and-drop-help {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.drag-and-drop-item-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-panel);
+  cursor: grab;
+}
+
+.drag-and-drop-item-content:active {
+  cursor: grabbing;
+}
+
+.drag-and-drop-item.drag-over .drag-and-drop-item-content {
+  border-color: var(--color-accent);
+}
+
+.drag-handle {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: -0.15em;
+}
+
+.drag-and-drop-item-index {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
