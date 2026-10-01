@@ -7,6 +7,7 @@ import { BasicScenario } from "./scenarios/basic/BasicScenario"
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
 import { ReorderingScenario } from "./scenarios/reordering/ReorderingScenario"
+import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario"
 
 const scenarios = [
   "Basic",
@@ -79,6 +80,13 @@ function App() {
 
             {activeScenario === "Reordering" && (
               <ReorderingScenario
+                config={config}
+                onRenderedItemCountChange={setRenderedItemCount}
+              />
+            )}
+
+            {activeScenario === "Drag & Drop" && (
+              <DragAndDropScenario
                 config={config}
                 onRenderedItemCountChange={setRenderedItemCount}
               />
