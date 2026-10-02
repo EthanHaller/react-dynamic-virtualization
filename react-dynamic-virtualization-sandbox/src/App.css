@@ -209,3 +209,8 @@
   visibility: visible;
   transform: translate(-50%, 0);
 }
+
+.control-description {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}

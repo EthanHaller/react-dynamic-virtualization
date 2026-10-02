@@ -2,6 +2,8 @@ import type { SandboxConfig } from "../../config/types"
 import { InfoTooltip } from "./InfoTooltip"
 import { NumberInput } from "./NumberInput"
 import { SelectInput } from "./SelectInput"
+import { sandboxPresets, type SandboxPreset } from "../../config/presets"
+import { PresetSelect } from "./PresetSelect"
 
 type ConfigurationPanelProps = {
   config: SandboxConfig
@@ -9,16 +11,23 @@ type ConfigurationPanelProps = {
     key: K,
     value: SandboxConfig[K],
   ) => void
+  applyPreset: (preset: SandboxPreset) => void
   resetConfig: () => void
 }
 
 export function ConfigurationPanel({
   config,
   updateConfig,
+  applyPreset,
   resetConfig,
 }: ConfigurationPanelProps) {
   return (
     <div className="configuration-content">
+      <PresetSelect
+        presets={sandboxPresets}
+        onSelect={(preset) => applyPreset(preset)}
+      />
+
       <NumberInput
         id="item-count"
         label="Items"

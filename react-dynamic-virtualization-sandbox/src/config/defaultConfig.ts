@@ -1,7 +1,7 @@
 import type { SandboxConfig } from "./types"
 
 export const defaultConfig: SandboxConfig = {
-  itemCount: 10_000,
+  itemCount: 20,
   itemSizing: "variable",
   itemSize: 80,
   minItemSize: 40,
@@ -9,5 +9,5 @@ export const defaultConfig: SandboxConfig = {
   overscan: 2,
   listHeight: 500,
   enableSizeChanges: true,
-  changeInterval: 1000,
+  changeInterval: 1_000,
 }

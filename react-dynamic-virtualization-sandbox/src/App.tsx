@@ -21,7 +21,7 @@ const scenarios = [
 function App() {
   const [activeScenario, setActiveScenario] = useState("Basic")
   const [renderedItemCount, setRenderedItemCount] = useState(0)
-  const { config, updateConfig, resetConfig } = useSandboxConfig()
+  const { config, updateConfig, applyPreset, resetConfig } = useSandboxConfig()
 
   return (
     <div className="app">
@@ -101,6 +101,7 @@ function App() {
             <ConfigurationPanel
               config={config}
               updateConfig={updateConfig}
+              applyPreset={applyPreset}
               resetConfig={resetConfig}
             />
           </aside>
