@@ -1,8 +1,11 @@
 import { useState } from "react"
 import { defaultConfig } from "./defaultConfig"
+import { sandboxPresets } from "./presets"
 import type { SandboxConfig } from "./types"
+import type { SandboxPreset } from "./presets"
 
 export function useSandboxConfig() {
+  const [preset, setPreset] = useState<SandboxPreset>(sandboxPresets[0])
   const [config, setConfig] = useState<SandboxConfig>(defaultConfig)
 
   function updateConfig<K extends keyof SandboxConfig>(
@@ -15,13 +18,19 @@ export function useSandboxConfig() {
     }))
   }
 
+  function applyPreset(preset: SandboxPreset) {
+    setPreset(preset)
+    setConfig(preset.config)
+  }
+
   function resetConfig() {
-    setConfig(defaultConfig)
+    setConfig(preset.config)
   }
 
   return {
     config,
     updateConfig,
+    applyPreset,
     resetConfig,
   }
 }
