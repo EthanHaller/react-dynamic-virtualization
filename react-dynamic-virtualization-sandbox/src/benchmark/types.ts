@@ -1,13 +1,7 @@
-import type { CSSProperties, ReactNode, Ref, ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 import type { SandboxItem } from "../data"
 
-export type BenchmarkRenderItem = (
-  item: SandboxItem,
-  options: {
-    ref: Ref<HTMLDivElement>
-    style: CSSProperties
-  },
-) => ReactElement
+export type BenchmarkRenderItem = (item: SandboxItem) => ReactElement
 
 export type BenchmarkListProps = {
   items: SandboxItem[]
