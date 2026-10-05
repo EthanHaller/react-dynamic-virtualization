@@ -1,5 +1,6 @@
-import { useVirtualizer } from "@tanstack/react-virtual"
 import { useRef } from "react"
+import { useVirtualizer } from "@tanstack/react-virtual"
+
 import type { BenchmarkProvider } from "../types"
 
 export const tanstackVirtualProvider: BenchmarkProvider = {
@@ -14,6 +15,7 @@ export const tanstackVirtualProvider: BenchmarkProvider = {
       count: items.length,
       getScrollElement: () => parentRef.current,
       estimateSize: () => 80,
+      getItemKey: (index) => items[index].id,
       overscan,
     })
 
@@ -47,10 +49,7 @@ export const tanstackVirtualProvider: BenchmarkProvider = {
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
               >
-                {renderItem(item, {
-                  ref: () => {},
-                  style: {},
-                })}
+                {renderItem(item)}
               </div>
             )
           })}

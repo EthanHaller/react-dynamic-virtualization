@@ -1,4 +1,5 @@
 import type { BenchmarkProvider } from "../types"
+
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 
 export const reactDynamicVirtualizationProvider: BenchmarkProvider = {
@@ -12,7 +13,11 @@ export const reactDynamicVirtualizationProvider: BenchmarkProvider = {
       getItemId={(item) => item.id}
       height={height}
       overscan={overscan}
-      renderItem={renderItem}
+      renderItem={(item, { ref, style }) => (
+        <div ref={ref} style={style}>
+          {renderItem(item)}
+        </div>
+      )}
     />
   ),
 }
