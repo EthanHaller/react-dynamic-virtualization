@@ -12,7 +12,8 @@
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.13",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "virtua": "^0.53.2"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
