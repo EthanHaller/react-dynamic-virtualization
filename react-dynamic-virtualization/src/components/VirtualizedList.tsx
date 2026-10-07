@@ -10,6 +10,7 @@ type VirtualizedListProps<T> = {
   height: number
   overscan?: number
   renderItem: (item: T, options: RenderItemOptions) => React.ReactElement
+  scrollElementRef?: React.Ref<HTMLDivElement>
 }
 
 export function VirtualizedList<T>({
@@ -18,6 +19,7 @@ export function VirtualizedList<T>({
   height,
   overscan = 2,
   renderItem,
+  scrollElementRef,
 }: VirtualizedListProps<T>) {
   const [scrollTop, setScrollTop] = useState(0)
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
@@ -40,6 +42,7 @@ export function VirtualizedList<T>({
   if (items.length === 0) {
     return (
       <div
+        ref={scrollElementRef}
         style={{
           height,
           overflowY: "auto",
@@ -84,6 +87,7 @@ export function VirtualizedList<T>({
 
   return (
     <div
+      ref={scrollElementRef}
       style={{
         height,
         overflowY: "auto",

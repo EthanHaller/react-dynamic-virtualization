@@ -1,14 +1,15 @@
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
+
 import { useVirtualizer } from "@tanstack/react-virtual"
 
-import type { BenchmarkProvider } from "../types"
+import type { BenchmarkProvider, BenchmarkScrollController } from "../types"
 
 export const tanstackVirtualProvider: BenchmarkProvider = {
   id: "tanstack-virtual",
   name: "TanStack Virtual",
   description: "TanStack's React virtualization library.",
 
-  List: ({ items, height, overscan, renderItem }) => {
+  List: ({ items, height, overscan, renderItem, onScrollController }) => {
     const parentRef = useRef<HTMLDivElement>(null)
 
     const virtualizer = useVirtualizer({
@@ -18,6 +19,28 @@ export const tanstackVirtualProvider: BenchmarkProvider = {
       getItemKey: (index) => items[index].id,
       overscan,
     })
+
+    useEffect(() => {
+      const controller: BenchmarkScrollController = {
+        scrollTo: (position) => {
+          const element = parentRef.current
+
+          if (!element) {
+            return
+          }
+
+          const maxScrollTop = element.scrollHeight - element.clientHeight
+
+          element.scrollTop = maxScrollTop * position
+        },
+      }
+
+      onScrollController(controller)
+
+      return () => {
+        onScrollController(null)
+      }
+    }, [onScrollController])
 
     return (
       <div
