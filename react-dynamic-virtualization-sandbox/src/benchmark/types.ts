@@ -1,7 +1,9 @@
 import type { ReactElement, ReactNode } from "react"
+
 import type { SandboxItem } from "../data"
 
 export type BenchmarkRenderItem = (item: SandboxItem) => ReactElement
+
 export type BenchmarkScrollController = {
   scrollTo: (position: number) => void
 }
@@ -19,4 +21,10 @@ export type BenchmarkProvider = {
   name: string
   description: string
   List: (props: BenchmarkListProps) => ReactNode
+}
+
+export type BenchmarkRunResult = {
+  duration: number
+  startTime: number
+  endTime: number
 }
