@@ -15,15 +15,25 @@ export const DEFAULT_SCROLL_STEPS: ScrollStep[] = [
   { position: 0, duration: 500 },
 ]
 
+type ScrollSequenceOptions = {
+  onComplete?: () => void
+}
+
 export function runScrollSequence(
   controller: BenchmarkScrollController,
   steps: ScrollStep[] = DEFAULT_SCROLL_STEPS,
+  options: ScrollSequenceOptions = {},
 ): () => void {
   let cancelled = false
   let timeoutId: number | undefined
 
   const runStep = (index: number) => {
-    if (cancelled || index >= steps.length) {
+    if (cancelled) {
+      return
+    }
+
+    if (index >= steps.length) {
+      options.onComplete?.()
       return
     }
 
