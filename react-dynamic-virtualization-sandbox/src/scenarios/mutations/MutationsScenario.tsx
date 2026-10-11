@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { SandboxConfig } from "../../config/types"
 import { createItems } from "../../data"
@@ -21,16 +21,7 @@ export function MutationsScenario({
   const nextIndex = useRef(config.itemCount)
   const renderedItems = useRef(new Set<string>())
 
-  useEffect(() => {
-    const nextItems = createItems(config.itemCount)
-
-    setItems(nextItems)
-    nextIndex.current = config.itemCount
-    renderedItems.current.clear()
-    onRenderedItemCountChange(0)
-  }, [config.itemCount, onRenderedItemCountChange])
-
-  function addItem() {
+  const addItem = useCallback(() => {
     const index = nextIndex.current
     nextIndex.current += 1
 
@@ -41,9 +32,9 @@ export function MutationsScenario({
     }
 
     setItems((current) => [...current, item])
-  }
+  }, [])
 
-  function removeItem() {
+  const removeItem = useCallback(() => {
     setItems((current) => {
       if (current.length === 0) {
         return current
@@ -51,9 +42,52 @@ export function MutationsScenario({
 
       return current.slice(0, -1)
     })
-  }
+  }, [])
 
-  function handleItemRef(itemId: string, element: HTMLDivElement | null) {
+  const moveItem = useCallback((fromIndex: number, toIndex: number) => {
+    setItems((current) => {
+      if (
+        fromIndex < 0 ||
+        fromIndex >= current.length ||
+        toIndex < 0 ||
+        toIndex >= current.length
+      ) {
+        return current
+      }
+
+      const next = [...current]
+      const [item] = next.splice(fromIndex, 1)
+
+      next.splice(toIndex, 0, item)
+
+      return next
+    })
+  }, [])
+
+  const reverseItems = useCallback(() => {
+    setItems((current) => [...current].reverse())
+  }, [])
+
+  const shuffleItems = useCallback(() => {
+    setItems((current) => {
+      const next = [...current]
+
+      for (let index = next.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1))
+
+        ;[next[index], next[swapIndex]] = [next[swapIndex], next[index]]
+      }
+
+      return next
+    })
+  }, [])
+
+  const resetItems = useCallback(() => {
+    nextIndex.current = config.itemCount
+    setItems(createItems(config.itemCount))
+  }, [config.itemCount])
+
+  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
       renderedItems.current.add(itemId)
     } else {
@@ -61,7 +95,7 @@ export function MutationsScenario({
     }
 
     onRenderedItemCountChange(renderedItems.current.size)
-  }
+  }, [onRenderedItemCountChange])
 
   return (
     <div className="mutations-scenario">
@@ -76,6 +110,42 @@ export function MutationsScenario({
           disabled={items.length === 0}
         >
           Remove item
+        </button>
+
+        <button
+          type="button"
+          onClick={() => moveItem(0, items.length - 1)}
+          disabled={items.length < 2}
+        >
+          Move first to end
+        </button>
+
+        <button
+          type="button"
+          onClick={() => moveItem(items.length - 1, 0)}
+          disabled={items.length < 2}
+        >
+          Move last to front
+        </button>
+
+        <button
+          type="button"
+          onClick={reverseItems}
+          disabled={items.length < 2}
+        >
+          Reverse
+        </button>
+
+        <button
+          type="button"
+          onClick={shuffleItems}
+          disabled={items.length < 2}
+        >
+          Shuffle
+        </button>
+
+        <button type="button" onClick={resetItems}>
+          Reset
         </button>
 
         <span className="mutation-count">

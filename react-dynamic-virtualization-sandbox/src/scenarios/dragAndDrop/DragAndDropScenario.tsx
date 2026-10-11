@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { SandboxConfig } from "../../config/types"
 import { createItems } from "../../data"
@@ -24,22 +24,15 @@ export function DragAndDropScenario({
   const draggedItemId = useRef<string | null>(null)
   const renderedItems = useRef(new Set<string>())
 
-  useEffect(() => {
-    setItems(createItems(config.itemCount))
-    draggedItemId.current = null
-    renderedItems.current.clear()
-    onRenderedItemCountChange(0)
-  }, [config.itemCount, onRenderedItemCountChange])
-
-  function handleDragStart(itemId: string) {
+  const handleDragStart = useCallback((itemId: string) => {
     draggedItemId.current = itemId
-  }
+  }, [])
 
-  function handleDragEnd() {
+  const handleDragEnd = useCallback(() => {
     draggedItemId.current = null
-  }
+  }, [])
 
-  function handleDrop(targetItemId: string) {
+  const handleDrop = useCallback((targetItemId: string) => {
     const sourceItemId = draggedItemId.current
 
     if (!sourceItemId || sourceItemId === targetItemId) {
@@ -61,9 +54,9 @@ export function DragAndDropScenario({
 
       return next
     })
-  }
+  }, [])
 
-  function handleItemRef(itemId: string, element: HTMLDivElement | null) {
+  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
       renderedItems.current.add(itemId)
     } else {
@@ -71,7 +64,7 @@ export function DragAndDropScenario({
     }
 
     onRenderedItemCountChange(renderedItems.current.size)
-  }
+  }, [onRenderedItemCountChange])
 
   return (
     <div className="drag-and-drop-scenario">
