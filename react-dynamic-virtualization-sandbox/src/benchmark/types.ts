@@ -22,9 +22,3 @@ export type BenchmarkProvider = {
   description: string
   List: (props: BenchmarkListProps) => ReactNode
 }
-
-export type BenchmarkRunResult = {
-  duration: number
-  startTime: number
-  endTime: number
-}
