@@ -1,8 +1,8 @@
-.basic-scenario {
+.initial-height-scenario {
   padding: var(--space-4);
 }
 
-.basic-item-content {
+.initial-height-item-content {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.basic-item-index {
+.initial-height-item-index {
   flex: 0 0 auto;
   color: var(--color-text-secondary);
   font-family: var(--font-mono);

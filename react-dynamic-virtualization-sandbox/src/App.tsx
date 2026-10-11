@@ -3,24 +3,23 @@ import { useState } from "react"
 import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
-import { BasicScenario } from "./scenarios/basic/BasicScenario"
+import { InitialHeightsScenario } from "./scenarios/initialHeights/InitialHeightsScenario"
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
-import { ReorderingScenario } from "./scenarios/reordering/ReorderingScenario"
 import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario"
 
 const scenarios = [
-  "Basic",
-  "Dynamic Sizes",
-  "Changing Sizes",
-  "Mutations",
-  "Reordering",
-  "Drag & Drop",
-]
+  { id: "fixed-heights", label: "Fixed heights" },
+  { id: "variable-initial-heights", label: "Variable initial heights" },
+  { id: "changing-heights", label: "Changing heights" },
+  { id: "mutations-and-reordering", label: "Mutations and reordering" },
+  { id: "drag-and-drop", label: "Drag and drop" },
+] as const
+
+type ScenarioId = (typeof scenarios)[number]["id"]
 
 function App() {
-  const [activeScenario, setActiveScenario] = useState("Basic")
-  const [renderedItemCount, setRenderedItemCount] = useState(0)
+  const [activeScenario, setActiveScenario] = useState<ScenarioId>("fixed-heights")
   const { config, updateConfig, applyPreset, resetConfig } = useSandboxConfig()
 
   return (
@@ -40,79 +39,101 @@ function App() {
         <nav className="scenario-nav" aria-label="Scenarios">
           {scenarios.map((scenario) => (
             <button
-              key={scenario}
+              key={scenario.id}
               className={`scenario-tab${
-                activeScenario === scenario ? " active" : ""
+                activeScenario === scenario.id ? " active" : ""
               }`}
               type="button"
-              onClick={() => setActiveScenario(scenario)}
+              aria-pressed={activeScenario === scenario.id}
+              onClick={() => setActiveScenario(scenario.id)}
             >
-              {scenario}
+              {scenario.label}
             </button>
           ))}
         </nav>
 
-        <div className="experiment-layout">
-          <section className="panel experiment-panel">
-            <div className="panel-header">
-              <h2>Experiment</h2>
-            </div>
-            {activeScenario === "Basic" && (
-              <BasicScenario
-                config={config}
-                onRenderedItemCountChange={setRenderedItemCount}
-              />
-            )}
-
-            {activeScenario === "Changing Sizes" && (
-              <ChangingSizesScenario
-                config={config}
-                onRenderedItemCountChange={setRenderedItemCount}
-              />
-            )}
-
-            {activeScenario === "Mutations" && (
-              <MutationsScenario
-                config={config}
-                onRenderedItemCountChange={setRenderedItemCount}
-              />
-            )}
-
-            {activeScenario === "Reordering" && (
-              <ReorderingScenario
-                config={config}
-                onRenderedItemCountChange={setRenderedItemCount}
-              />
-            )}
-
-            {activeScenario === "Drag & Drop" && (
-              <DragAndDropScenario
-                config={config}
-                onRenderedItemCountChange={setRenderedItemCount}
-              />
-            )}
-          </section>
-
-          <aside className="panel configuration-panel">
-            <div className="panel-header">
-              <h2>Configuration</h2>
-            </div>
-
-            <ConfigurationPanel
-              config={config}
-              updateConfig={updateConfig}
-              applyPreset={applyPreset}
-              resetConfig={resetConfig}
-            />
-          </aside>
-        </div>
-
-        <DiagnosticsPanel
+        <ScenarioExperiment
+          key={`${activeScenario}:${config.itemCount}`}
+          activeScenario={activeScenario}
           config={config}
-          renderedItemCount={renderedItemCount}
+          updateConfig={updateConfig}
+          applyPreset={applyPreset}
+          resetConfig={resetConfig}
         />
       </main>
     </div>
+  )
+}
+
+function ScenarioExperiment({
+  activeScenario,
+  config,
+  updateConfig,
+  applyPreset,
+  resetConfig,
+}: ReturnType<typeof useSandboxConfig> & { activeScenario: ScenarioId }) {
+  const [renderedItemCount, setRenderedItemCount] = useState(0)
+
+  return (
+    <>
+      <div className="experiment-layout">
+        <section className="panel experiment-panel">
+          <div className="panel-header">
+            <h2>Experiment</h2>
+          </div>
+          {(activeScenario === "fixed-heights" ||
+            activeScenario === "variable-initial-heights") && (
+            <InitialHeightsScenario
+              sizing={activeScenario === "fixed-heights" ? "fixed" : "variable"}
+              config={config}
+              onRenderedItemCountChange={setRenderedItemCount}
+            />
+          )}
+
+          {activeScenario === "changing-heights" && (
+            <ChangingSizesScenario
+              config={config}
+              onRenderedItemCountChange={setRenderedItemCount}
+            />
+          )}
+
+          {activeScenario === "mutations-and-reordering" && (
+            <MutationsScenario
+              config={config}
+              onRenderedItemCountChange={setRenderedItemCount}
+            />
+          )}
+
+          {activeScenario === "drag-and-drop" && (
+            <DragAndDropScenario
+              config={config}
+              onRenderedItemCountChange={setRenderedItemCount}
+            />
+          )}
+        </section>
+
+        <aside className="panel configuration-panel">
+          <div className="panel-header">
+            <h2>Configuration</h2>
+          </div>
+
+          <ConfigurationPanel
+            config={config}
+            updateConfig={updateConfig}
+            applyPreset={applyPreset}
+            resetConfig={resetConfig}
+          />
+        </aside>
+      </div>
+
+      <DiagnosticsPanel
+        config={{
+          ...config,
+          itemSizing: activeScenario === "fixed-heights" ? "fixed" : "variable",
+        }}
+        renderedItemCount={renderedItemCount}
+      />
+    </>
   )
 }
 

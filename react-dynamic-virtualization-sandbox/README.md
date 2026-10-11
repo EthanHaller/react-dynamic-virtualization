@@ -1,78 +1,17 @@
-# React + TypeScript + Vite
+# React Dynamic Virtualization sandbox
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Run `npm install`, then `npm run dev` using a Node version supported by Vite 8 (Node 22.12+). Run `npm run build` and `npm run lint` to verify changes.
 
-Currently, two official plugins are available:
+## Scenario implementation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The five scenarios use stable identifiers independently of their display labels:
 
-## React Compiler
+- `fixed-heights`: Fixed heights. Rows use the configured item size and clip overflowing content.
+- `variable-initial-heights`: Variable initial heights. Rows use their natural content height, measured by the virtualized list. Applying the configured minimum/maximum size range is unfinished; the list remains functional using content-driven variation.
+- `changing-heights`: Changing heights. Retains timed content expansion, controlled by the size-change toggle and interval.
+- `mutations-and-reordering`: Mutations and reordering. Add, remove, move first to end, move last to front, reverse, shuffle, and reset act on the same list. Reset restores the configured initial items and next insertion index.
+- `drag-and-drop`: Drag and drop. Retains native dragging onto another row to reorder.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+The scenario identity selects the sizing model; the shared item-sizing selector does not override it. Wiring that selector to scenario-aware configuration remains unfinished. No routes, URL configuration, providers, or benchmark execution are added.
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Switching scenarios or changing the configured item count remounts the experiment and its rendered-item diagnostics. Configuration persists, while list edits and scroll position reset. Other configuration changes update the current experiment in place.

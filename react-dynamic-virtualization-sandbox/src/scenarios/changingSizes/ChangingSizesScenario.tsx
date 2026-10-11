@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { SandboxConfig } from "../../config/types"
 import { createItems } from "../../data"
@@ -25,7 +25,7 @@ export function ChangingSizesScenario({
     config.changeInterval,
   )
 
-  function handleItemRef(itemId: string, element: HTMLDivElement | null) {
+  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
       renderedItems.current.add(itemId)
     } else {
@@ -33,7 +33,7 @@ export function ChangingSizesScenario({
     }
 
     onRenderedItemCountChange(renderedItems.current.size)
-  }
+  }, [onRenderedItemCountChange])
 
   return (
     <div className="changing-sizes-scenario">

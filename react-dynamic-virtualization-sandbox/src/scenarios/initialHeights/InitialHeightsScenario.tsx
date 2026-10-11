@@ -1,24 +1,26 @@
-import { useMemo, useRef } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { SandboxConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
-import "./BasicScenario.css"
+import "./InitialHeightsScenario.css"
 
-type BasicScenarioProps = {
+type InitialHeightsScenarioProps = {
+  sizing: "fixed" | "variable"
   config: SandboxConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
-export function BasicScenario({
+export function InitialHeightsScenario({
+  sizing,
   config,
   onRenderedItemCountChange,
-}: BasicScenarioProps) {
+}: InitialHeightsScenarioProps) {
   const renderedItems = useRef(new Set<string>())
 
   const items = useMemo(() => createItems(config.itemCount), [config.itemCount])
 
-  function handleItemRef(itemId: string, element: HTMLDivElement | null) {
+  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
       renderedItems.current.add(itemId)
     } else {
@@ -26,18 +28,19 @@ export function BasicScenario({
     }
 
     onRenderedItemCountChange(renderedItems.current.size)
-  }
+  }, [onRenderedItemCountChange])
 
   return (
-    <div className="basic-scenario">
+    <div className="initial-height-scenario">
       <VirtualizedList
         items={items}
         getItemId={(item) => item.id}
         height={config.listHeight}
         overscan={config.overscan}
         renderItem={(item, { ref, style }) => (
-          <BasicItem
+          <InitialHeightItem
             item={item}
+            height={sizing === "fixed" ? config.itemSize : undefined}
             ref={(element) => {
               ref(element)
               handleItemRef(item.id, element)
@@ -50,17 +53,18 @@ export function BasicScenario({
   )
 }
 
-type BasicItemProps = {
+type InitialHeightItemProps = {
   item: SandboxItem
+  height?: number
   ref: React.Ref<HTMLDivElement>
   style: React.CSSProperties
 }
 
-function BasicItem({ item, ref, style }: BasicItemProps) {
+function InitialHeightItem({ item, height, ref, style }: InitialHeightItemProps) {
   return (
-    <div ref={ref} className="basic-item" style={style}>
-      <div className="basic-item-content">
-        <span className="basic-item-index">#{item.index}</span>
+    <div ref={ref} className="initial-height-item" style={{ ...style, height }}>
+      <div className="initial-height-item-content">
+        <span className="initial-height-item-index">#{item.index}</span>
         <span>{item.content}</span>
       </div>
     </div>
