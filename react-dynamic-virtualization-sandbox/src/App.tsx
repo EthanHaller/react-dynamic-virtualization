@@ -1,5 +1,7 @@
 import "./App.css"
 import { useState } from "react"
+import { scenarios, type ScenarioId } from "./routing/scenarioRoutes"
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from "react-router"
 import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
@@ -8,18 +10,8 @@ import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesSc
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
 import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario"
 
-const scenarios = [
-  { id: "fixed-heights", label: "Fixed heights" },
-  { id: "variable-initial-heights", label: "Variable initial heights" },
-  { id: "changing-heights", label: "Changing heights" },
-  { id: "mutations-and-reordering", label: "Mutations and reordering" },
-  { id: "drag-and-drop", label: "Drag and drop" },
-] as const
-
-type ScenarioId = (typeof scenarios)[number]["id"]
-
 function App() {
-  const [activeScenario, setActiveScenario] = useState<ScenarioId>("fixed-heights")
+  const { pathname, search, hash } = useLocation()
   const { config, updateConfig, applyPreset, resetConfig } = useSandboxConfig()
 
   return (
@@ -38,28 +30,43 @@ function App() {
       <main className="app-main">
         <nav className="scenario-nav" aria-label="Scenarios">
           {scenarios.map((scenario) => (
-            <button
+            <NavLink
               key={scenario.id}
-              className={`scenario-tab${
-                activeScenario === scenario.id ? " active" : ""
-              }`}
-              type="button"
-              aria-pressed={activeScenario === scenario.id}
-              onClick={() => setActiveScenario(scenario.id)}
+              to={`${scenario.path}${search}`}
+              end
+              className={({ isActive }) => `scenario-tab${isActive ? " active" : ""}`}
             >
               {scenario.label}
-            </button>
+            </NavLink>
           ))}
         </nav>
 
-        <ScenarioExperiment
-          key={`${activeScenario}:${config.itemCount}`}
-          activeScenario={activeScenario}
-          config={config}
-          updateConfig={updateConfig}
-          applyPreset={applyPreset}
-          resetConfig={resetConfig}
-        />
+        <Routes>
+          <Route path="/" element={<Navigate to={`/fixed${search}${hash}`} replace />} />
+          {scenarios.map((scenario) => (
+            <Route
+              key={scenario.id}
+              path={scenario.path}
+              element={
+                <ScenarioExperiment
+                  key={`${scenario.id}:${config.itemCount}`}
+                  activeScenario={scenario.id}
+                  config={config}
+                  updateConfig={updateConfig}
+                  applyPreset={applyPreset}
+                  resetConfig={resetConfig}
+                />
+              }
+            />
+          ))}
+          <Route path="*" element={
+            <section className="panel not-found">
+              <h2>Scenario not found</h2>
+              <p>No scenario is available at <code>{pathname}</code>. Choose a scenario above or return to fixed heights.</p>
+              <Link to={`/fixed${search}`}>Go to fixed heights</Link>
+            </section>
+          } />
+        </Routes>
       </main>
     </div>
   )

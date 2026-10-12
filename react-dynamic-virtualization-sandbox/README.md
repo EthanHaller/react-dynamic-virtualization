@@ -12,6 +12,12 @@ The five scenarios use stable identifiers independently of their display labels:
 - `mutations-and-reordering`: Mutations and reordering. Add, remove, move first to end, move last to front, reverse, shuffle, and reset act on the same list. Reset restores the configured initial items and next insertion index.
 - `drag-and-drop`: Drag and drop. Retains native dragging onto another row to reorder.
 
-The scenario identity selects the sizing model; the shared item-sizing selector does not override it. Wiring that selector to scenario-aware configuration remains unfinished. No routes, URL configuration, providers, or benchmark execution are added.
+The scenario identity selects the sizing model; the shared item-sizing selector does not override it. Wiring that selector to scenario-aware configuration remains unfinished. Query parameters are retained during scenario navigation but are not interpreted as configuration.
 
 Switching scenarios or changing the configured item count remounts the experiment and its rendered-item diagnostics. Configuration persists, while list edits and scroll position reset. Other configuration changes update the current experiment in place.
+
+## Scenario routes
+
+Open `/fixed`, `/variable`, `/changing`, `/mutations`, or `/drag-and-drop` directly. `/` redirects to `/fixed` while retaining its query string and fragment. Unknown paths show an explanation and links to valid scenarios. React Router handles route matching and browser history. Navigation uses native links with `aria-current="page"`; ordinary clicks use browser history, and modified clicks retain native browser behavior.
+
+Vite's default SPA fallback serves these paths in both `npm run dev` and `npm run preview` (after `npm run build`). A deployed static host must likewise serve `index.html` for scenario paths.
