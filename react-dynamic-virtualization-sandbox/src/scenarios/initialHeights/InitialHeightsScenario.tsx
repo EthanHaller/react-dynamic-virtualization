@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
-import type { SandboxConfig } from "../../config/types"
+import type { InitialHeightsConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
 import "./InitialHeightsScenario.css"
 
 type InitialHeightsScenarioProps = {
   sizing: "fixed" | "variable"
-  config: SandboxConfig
+  config: InitialHeightsConfig
   onRenderedItemCountChange: (count: number) => void
 }
 

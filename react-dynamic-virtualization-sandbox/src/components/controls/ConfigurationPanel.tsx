@@ -1,11 +1,14 @@
 import type { SandboxConfig } from "../../config/types"
 import { InfoTooltip } from "./InfoTooltip"
 import { NumberInput } from "./NumberInput"
-import { SelectInput } from "./SelectInput"
+import type { ScenarioId } from "../../routing/scenarioRoutes"
+import { scenarioControls } from "../../config/controlAvailability"
 import { sandboxPresets, type SandboxPreset } from "../../config/presets"
 import { PresetSelect } from "./PresetSelect"
 
 type ConfigurationPanelProps = {
+  scenario: ScenarioId
+  preset: SandboxPreset
   config: SandboxConfig
   updateConfig: <K extends keyof SandboxConfig>(
     key: K,
@@ -16,6 +19,8 @@ type ConfigurationPanelProps = {
 }
 
 export function ConfigurationPanel({
+  scenario,
+  preset,
   config,
   updateConfig,
   applyPreset,
@@ -24,55 +29,53 @@ export function ConfigurationPanel({
   return (
     <div className="configuration-content">
       <PresetSelect
-        presets={sandboxPresets}
+        preset={preset}
+        presets={sandboxPresets.filter((preset) => scenario === "changing-heights" || preset.name !== "Rapid Changes")}
         onSelect={(preset) => applyPreset(preset)}
       />
 
-      <NumberInput
+      {scenarioControls[scenario].includes("itemCount") && <NumberInput
         id="item-count"
-        label="Items"
+        label={scenario === "mutations-and-reordering" || scenario === "drag-and-drop" ? "Initial items" : "Items"}
         value={config.itemCount}
         min={1}
         onChange={(value) => updateConfig("itemCount", value)}
-      />
+      />}
 
-      <SelectInput
-        id="item-sizing"
-        label="Sizing"
-        value={config.itemSizing}
-        options={[
-          { label: "Fixed", value: "fixed" },
-          { label: "Variable", value: "variable" },
-        ]}
-        onChange={(value) => updateConfig("itemSizing", value)}
-      />
+      {scenarioControls[scenario].includes("itemSize") && <NumberInput
+        id="item-size"
+        label="Item height (px)"
+        value={config.itemSize}
+        min={1}
+        onChange={(value) => updateConfig("itemSize", value)}
+      />}
 
-      <NumberInput
+      {scenarioControls[scenario].includes("overscan") && <NumberInput
         id="overscan"
         label="Overscan"
         value={config.overscan}
         min={0}
         onChange={(value) => updateConfig("overscan", value)}
-      />
+      />}
 
-      <NumberInput
+      {scenarioControls[scenario].includes("listHeight") && <NumberInput
         id="list-height"
-        label="List height"
+        label="List height (px)"
         value={config.listHeight}
         min={100}
         onChange={(value) => updateConfig("listHeight", value)}
-      />
+      />}
 
-      <NumberInput
+      {scenarioControls[scenario].includes("changeInterval") && config.enableSizeChanges && <NumberInput
         id="change-interval"
-        label="Change interval"
+        label="Change interval (ms)"
         value={config.changeInterval}
         min={100}
         step={100}
         onChange={(value) => updateConfig("changeInterval", value)}
-      />
+      />}
 
-      <label className="control control-checkbox" htmlFor="enable-size-changes">
+      {scenarioControls[scenario].includes("enableSizeChanges") && <label className="control control-checkbox" htmlFor="enable-size-changes">
         <input
           id="enable-size-changes"
           name="enable-size-changes"
@@ -83,10 +86,10 @@ export function ConfigurationPanel({
           }
         />
 
-        <span className="control-label">Size changes</span>
+        <span className="control-label">Automatic size changes</span>
 
-        <InfoTooltip content="Randomly expands and collapses about half of the items at the configured interval." />
-      </label>
+        <InfoTooltip content="Selects half the items to expand at each interval. Turning this off pauses changes and keeps the current heights." />
+      </label>}
 
       <button type="button" onClick={resetConfig}>
         Reset

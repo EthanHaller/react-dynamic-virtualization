@@ -1,34 +1,42 @@
 import { useCallback, useState } from "react"
+import type { ScenarioId } from "../routing/scenarioRoutes"
+import { scenarioControls } from "./controlAvailability"
 import { defaultConfig } from "./defaultConfig"
 import { sandboxPresets } from "./presets"
 import type { SandboxConfig } from "./types"
 import type { SandboxPreset } from "./presets"
 
-export function useSandboxConfig() {
-  const [preset, setPreset] = useState<SandboxPreset>(sandboxPresets[0])
-  const [config, setConfig] = useState<SandboxConfig>(defaultConfig)
+type ScenarioConfigState = { config: SandboxConfig; preset: SandboxPreset }
+
+export function useSandboxConfig(scenario: ScenarioId) {
+  const [states, setStates] = useState<Partial<Record<ScenarioId, ScenarioConfigState>>>({})
+  const { config, preset } = states[scenario] ?? { config: defaultConfig, preset: sandboxPresets[0] }
 
   const updateConfig = useCallback(<K extends keyof SandboxConfig>(
     key: K,
     value: SandboxConfig[K],
   ) => {
-    setConfig((current) => ({
+    if (!scenarioControls[scenario].some((field) => field === key)) return
+    setStates((current) => ({
       ...current,
-      [key]: value,
+      [scenario]: {
+        preset: current[scenario]?.preset ?? preset,
+        config: { ...(current[scenario]?.config ?? defaultConfig), [key]: value },
+      },
     }))
-  }, [])
+  }, [scenario, preset])
 
   const applyPreset = useCallback((preset: SandboxPreset) => {
-    setPreset(preset)
-    setConfig(preset.config)
-  }, [])
+    setStates((current) => ({ ...current, [scenario]: { preset, config: preset.config } }))
+  }, [scenario])
 
   const resetConfig = useCallback(() => {
-    setConfig(preset.config)
-  }, [preset.config])
+    setStates((current) => ({ ...current, [scenario]: { preset, config: preset.config } }))
+  }, [scenario, preset])
 
   return {
     config,
+    preset,
     updateConfig,
     applyPreset,
     resetConfig,

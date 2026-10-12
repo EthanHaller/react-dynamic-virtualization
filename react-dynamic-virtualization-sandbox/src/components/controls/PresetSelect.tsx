@@ -1,13 +1,12 @@
-import { useState } from "react"
 import type { SandboxPreset } from "../../config/presets"
 
 type PresetSelectProps = {
+  preset: SandboxPreset
   presets: SandboxPreset[]
   onSelect: (preset: SandboxPreset) => void
 }
 
-export function PresetSelect({ presets, onSelect }: PresetSelectProps) {
-  const [activePreset, setActivePreset] = useState<SandboxPreset>(presets[0])
+export function PresetSelect({ preset: activePreset, presets, onSelect }: PresetSelectProps) {
 
   return (
     <label className="control">
@@ -21,15 +20,10 @@ export function PresetSelect({ presets, onSelect }: PresetSelectProps) {
           )
 
           if (preset) {
-            setActivePreset(preset)
             onSelect(preset)
           }
         }}
       >
-        <option value="" disabled>
-          Select preset
-        </option>
-
         {presets.map((preset) => (
           <option key={preset.name} value={preset.name}>
             {preset.name}

@@ -21,3 +21,26 @@ Switching scenarios or changing the configured item count remounts the experimen
 Open `/fixed`, `/variable`, `/changing`, `/mutations`, or `/drag-and-drop` directly. `/` redirects to `/fixed` while retaining its query string and fragment. Unknown paths show an explanation and links to valid scenarios. React Router handles route matching and browser history. Navigation uses native links with `aria-current="page"`; ordinary clicks use browser history, and modified clicks retain native browser behavior.
 
 Vite's default SPA fallback serves these paths in both `npm run dev` and `npm run preview` (after `npm run build`). A deployed static host must likewise serve `index.html` for scenario paths.
+
+## Scenario configuration
+
+Configuration and the selected reset preset are stored separately for each scenario.
+Changing the initial item count recreates that scenario's list. Other configuration
+changes preserve its current item order. Navigation still remounts the experiment.
+
+| Field | Availability | Implemented effect |
+| --- | --- | --- |
+| `itemCount` | All scenarios | Creates the list; labeled Initial items for mutation/reordering scenarios |
+| `overscan` | All scenarios | Adds rendered items around the viewport |
+| `listHeight` | All scenarios | Sets the scroll viewport height in pixels |
+| `itemSize` | Fixed heights | Sets each row's height in pixels |
+| `enableSizeChanges` | Changing heights | Starts/pauses random expansion updates; pausing retains current heights |
+| `changeInterval` | Changing heights, while updates are enabled | Sets update frequency in milliseconds |
+| `itemSizing` | Removed | Route already determines sizing; the field was unwired |
+| `minItemSize`, `maxItemSize` | Removed | No scenario consumed these fields |
+
+The explicit allowlists in `src/config/controlAvailability.ts` govern rendering and
+configuration updates. Scenario props use narrow configuration types. New controls
+must be opted into their owning scenarios. Rapid Changes is offered only in Changing
+heights; the unwired Extreme Sizes preset has been removed. Reset restores the active
+scenario's selected preset.

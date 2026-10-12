@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
-import type { SandboxConfig } from "../../config/types"
+import type { ListConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
 import "./MutationsScenario.css"
 
 type MutationsScenarioProps = {
-  config: SandboxConfig
+  config: ListConfig
   onRenderedItemCountChange: (count: number) => void
 }
 

@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
-import type { SandboxConfig } from "../../config/types"
+import type { ListConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
 import "./DragAndDropScenario.css"
 
 type DragAndDropScenarioProps = {
-  config: SandboxConfig
+  config: ListConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
