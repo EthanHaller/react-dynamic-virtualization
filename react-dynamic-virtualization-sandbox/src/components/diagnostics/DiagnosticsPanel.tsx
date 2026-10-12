@@ -2,11 +2,13 @@ import type { SandboxConfig } from "../../config/types"
 import "./DiagnosticsPanel.css"
 
 type DiagnosticsPanelProps = {
+  sizing: "fixed" | "variable"
   config: SandboxConfig
   renderedItemCount: number
 }
 
 export function DiagnosticsPanel({
+  sizing,
   config,
   renderedItemCount,
 }: DiagnosticsPanelProps) {
@@ -21,7 +23,7 @@ export function DiagnosticsPanel({
         <DiagnosticValue label="Rendered" value={renderedItemCount} />
         <DiagnosticValue label="Overscan" value={config.overscan} />
         <DiagnosticValue label="List height" value={`${config.listHeight}px`} />
-        <DiagnosticValue label="Sizing" value={config.itemSizing} />
+        <DiagnosticValue label="Sizing" value={sizing} />
       </div>
     </section>
   )

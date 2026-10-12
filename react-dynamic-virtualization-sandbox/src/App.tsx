@@ -12,7 +12,8 @@ import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario
 
 function App() {
   const { pathname, search, hash } = useLocation()
-  const { config, updateConfig, applyPreset, resetConfig } = useSandboxConfig()
+  const activeScenario = scenarios.find((scenario) => scenario.path === pathname)?.id ?? "fixed-heights"
+  const { config, preset, updateConfig, applyPreset, resetConfig } = useSandboxConfig(activeScenario)
 
   return (
     <div className="app">
@@ -51,6 +52,7 @@ function App() {
                 <ScenarioExperiment
                   key={`${scenario.id}:${config.itemCount}`}
                   activeScenario={scenario.id}
+                  preset={preset}
                   config={config}
                   updateConfig={updateConfig}
                   applyPreset={applyPreset}
@@ -74,6 +76,7 @@ function App() {
 
 function ScenarioExperiment({
   activeScenario,
+  preset,
   config,
   updateConfig,
   applyPreset,
@@ -125,6 +128,8 @@ function ScenarioExperiment({
           </div>
 
           <ConfigurationPanel
+            scenario={activeScenario}
+            preset={preset}
             config={config}
             updateConfig={updateConfig}
             applyPreset={applyPreset}
@@ -134,10 +139,8 @@ function ScenarioExperiment({
       </div>
 
       <DiagnosticsPanel
-        config={{
-          ...config,
-          itemSizing: activeScenario === "fixed-heights" ? "fixed" : "variable",
-        }}
+        config={config}
+        sizing={activeScenario === "fixed-heights" ? "fixed" : "variable"}
         renderedItemCount={renderedItemCount}
       />
     </>

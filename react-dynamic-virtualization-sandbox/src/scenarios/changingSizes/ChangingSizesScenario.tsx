@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
-import type { SandboxConfig } from "../../config/types"
+import type { ChangingHeightsConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
 import { getAdditionalContent, useChangingSizes } from "./useChangingSizes"
 import "./ChangingSizesScenario.css"
 
 type ChangingSizesScenarioProps = {
-  config: SandboxConfig
+  config: ChangingHeightsConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
