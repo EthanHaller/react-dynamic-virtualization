@@ -38,7 +38,7 @@ export function ConfigurationPanel({
         id="item-count"
         label={scenario === "mutations-and-reordering" || scenario === "drag-and-drop" ? "Initial items" : "Items"}
         value={config.itemCount}
-        min={1}
+        min={scenario === "fixed-heights" ? 0 : 1}
         onChange={(value) => updateConfig("itemCount", value)}
       />}
 

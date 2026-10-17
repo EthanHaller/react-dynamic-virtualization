@@ -33,7 +33,7 @@ changes preserve its current item order. Navigation still remounts the experimen
 | `itemCount` | All scenarios | Creates the list; labeled Initial items for mutation/reordering scenarios |
 | `overscan` | All scenarios | Adds rendered items around the viewport |
 | `listHeight` | All scenarios | Sets the scroll viewport height in pixels |
-| `itemSize` | Fixed heights | Sets each row's height in pixels |
+| `itemSize` | Fixed heights | Sets each row's border-box height in pixels |
 | `enableSizeChanges` | Changing heights | Starts/pauses random expansion updates; pausing retains current heights |
 | `changeInterval` | Changing heights, while updates are enabled | Sets update frequency in milliseconds |
 | `itemSizing` | Removed | Route already determines sizing; the field was unwired |

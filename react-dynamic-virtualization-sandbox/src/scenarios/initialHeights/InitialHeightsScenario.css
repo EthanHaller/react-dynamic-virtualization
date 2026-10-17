@@ -20,3 +20,20 @@
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
 }
+
+.initial-height-item-fixed {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.initial-height-item-fixed .initial-height-item-content {
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.initial-height-item-fixed .initial-height-item-text {
+  min-width: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
