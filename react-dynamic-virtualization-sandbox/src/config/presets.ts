@@ -11,6 +11,8 @@ export const sandboxPresets: SandboxPreset[] = [
     name: "Default",
     description: "Balanced workload for exploring the scenarios.",
     config: {
+      minHeight: 50,
+      maxHeight: 300,
       itemCount: 20,
       itemSize: 80,
       overscan: 2,
@@ -23,6 +25,8 @@ export const sandboxPresets: SandboxPreset[] = [
     name: "Large List",
     description: "10,000 items with a small viewport.",
     config: {
+      minHeight: 50,
+      maxHeight: 300,
       itemCount: 10_000,
       itemSize: 80,
       overscan: 5,
@@ -35,6 +39,8 @@ export const sandboxPresets: SandboxPreset[] = [
     name: "High Overscan",
     description: "More items rendered around the viewport.",
     config: {
+      minHeight: 50,
+      maxHeight: 300,
       itemCount: 10_000,
       itemSize: 80,
       overscan: 50,
@@ -47,6 +53,8 @@ export const sandboxPresets: SandboxPreset[] = [
     name: "Rapid Changes",
     description: "Frequently changing item heights.",
     config: {
+      minHeight: 50,
+      maxHeight: 300,
       itemCount: 10_000,
       itemSize: 80,
       overscan: 5,

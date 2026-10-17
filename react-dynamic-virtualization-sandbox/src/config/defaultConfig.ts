@@ -1,6 +1,8 @@
 import type { SandboxConfig } from "./types"
 
 export const defaultConfig: SandboxConfig = {
+  minHeight: 50,
+  maxHeight: 300,
   itemCount: 20,
   itemSize: 80,
   overscan: 2,
