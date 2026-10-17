@@ -62,10 +62,10 @@ type InitialHeightItemProps = {
 
 function InitialHeightItem({ item, height, ref, style }: InitialHeightItemProps) {
   return (
-    <div ref={ref} className="initial-height-item" style={{ ...style, height }}>
+    <div ref={ref} className={`initial-height-item${height === undefined ? "" : " initial-height-item-fixed"}`} style={{ ...style, height }}>
       <div className="initial-height-item-content">
         <span className="initial-height-item-index">#{item.index}</span>
-        <span>{item.content}</span>
+        <span className="initial-height-item-text">{item.content}</span>
       </div>
     </div>
   )

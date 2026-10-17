@@ -29,7 +29,7 @@ export function NumberInput({
         max={max}
         step={step}
         onChange={(event) => {
-          const nextValue = Number(event.target.value)
+          const nextValue = event.target.valueAsNumber
 
           if (Number.isFinite(nextValue)) {
             onChange(nextValue)
