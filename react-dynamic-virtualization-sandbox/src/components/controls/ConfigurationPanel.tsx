@@ -38,9 +38,13 @@ export function ConfigurationPanel({
         id="item-count"
         label={scenario === "mutations-and-reordering" || scenario === "drag-and-drop" ? "Initial items" : "Items"}
         value={config.itemCount}
-        min={scenario === "fixed-heights" ? 0 : 1}
+        min={scenario === "fixed-heights" || scenario === "variable-initial-heights" ? 0 : 1}
         onChange={(value) => updateConfig("itemCount", value)}
       />}
+
+      {([ ["minHeight", "Minimum height (px)", 50, 300], ["maxHeight", "Maximum height (px)", 50, 300] ] as const).map(([key, label, min, max]) => scenarioControls[scenario].includes(key) && (
+        <NumberInput key={key} id={key} label={label} value={config[key]} min={min} max={max} onChange={(value) => updateConfig(key, value)} />
+      ))}
 
       {scenarioControls[scenario].includes("itemSize") && <NumberInput
         id="item-size"

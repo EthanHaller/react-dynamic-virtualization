@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { InitialHeightsConfig } from "../../config/types"
+import { createHeightItems } from "../../data/createHeightItems"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
 import "./InitialHeightsScenario.css"
@@ -18,7 +19,12 @@ export function InitialHeightsScenario({
 }: InitialHeightsScenarioProps) {
   const renderedItems = useRef(new Set<string>())
 
-  const items = useMemo(() => createItems(config.itemCount), [config.itemCount])
+  const { itemCount, minHeight, maxHeight } = config
+  const items = useMemo<(SandboxItem & { height?: number })[]>(() => {
+    if (sizing === "fixed") return createItems(itemCount)
+    const heightConfig = { itemCount, minHeight, maxHeight }
+    return createHeightItems(heightConfig)
+  }, [sizing, itemCount, minHeight, maxHeight])
 
   const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
@@ -40,7 +46,7 @@ export function InitialHeightsScenario({
         renderItem={(item, { ref, style }) => (
           <InitialHeightItem
             item={item}
-            height={sizing === "fixed" ? config.itemSize : undefined}
+            height={sizing === "fixed" ? config.itemSize : item.height}
             ref={(element) => {
               ref(element)
               handleItemRef(item.id, element)
@@ -62,7 +68,7 @@ type InitialHeightItemProps = {
 
 function InitialHeightItem({ item, height, ref, style }: InitialHeightItemProps) {
   return (
-    <div ref={ref} className={`initial-height-item${height === undefined ? "" : " initial-height-item-fixed"}`} style={{ ...style, height }}>
+    <div ref={ref} data-item-id={item.id} data-height={height} className={`initial-height-item${height === undefined ? "" : " initial-height-item-fixed"}`} style={{ ...style, height }}>
       <div className="initial-height-item-content">
         <span className="initial-height-item-index">#{item.index}</span>
         <span className="initial-height-item-text">{item.content}</span>
