@@ -15,7 +15,8 @@ type ConfigurationPanelProps = {
     value: SandboxConfig[K],
   ) => void
   applyPreset: (preset: SandboxPreset) => void
-  resetConfig: () => void
+  resetExperiment: () => void
+  restoreDefaultConfig: () => void
 }
 
 export function ConfigurationPanel({
@@ -24,13 +25,14 @@ export function ConfigurationPanel({
   config,
   updateConfig,
   applyPreset,
-  resetConfig,
+  restoreDefaultConfig,
+  resetExperiment,
 }: ConfigurationPanelProps) {
   return (
     <div className="configuration-content">
       <PresetSelect
         preset={preset}
-        presets={sandboxPresets.filter((preset) => scenario === "changing-heights" || preset.name !== "Rapid Changes")}
+        presets={[...(preset.name === "Custom" ? [preset] : []), ...sandboxPresets.filter((preset) => scenario === "changing-heights" || preset.name !== "Rapid Changes")]}
         onSelect={(preset) => applyPreset(preset)}
       />
 
@@ -95,9 +97,8 @@ export function ConfigurationPanel({
         <InfoTooltip content="Selects half the items to expand at each interval. Turning this off pauses changes and keeps the current heights." />
       </label>}
 
-      <button type="button" onClick={resetConfig}>
-        Reset
-      </button>
+      <button type="button" onClick={resetExperiment}>Reset experiment</button>
+      <button type="button" onClick={restoreDefaultConfig}>Restore defaults</button>
     </div>
   )
 }

@@ -1,10 +1,13 @@
 import "./App.css"
-import { useState } from "react"
+import { parseScenarioConfig, serializeScenarioConfig } from "./config/scenarioQuery"
+import { useLayoutEffect, useRef, useState } from "react"
 import { scenarios, type ScenarioId } from "./routing/scenarioRoutes"
-import { Link, NavLink, Navigate, Route, Routes, useLocation } from "react-router"
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigationType } from "react-router"
 import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
+import { defaultConfig } from "./config/defaultConfig"
+import type { ScenarioExperimentHandle } from "./scenarios/types"
 import { InitialHeightsScenario } from "./scenarios/initialHeights/InitialHeightsScenario"
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
@@ -13,7 +16,7 @@ import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario
 function App() {
   const { pathname, search, hash } = useLocation()
   const activeScenario = scenarios.find((scenario) => scenario.path === pathname)?.id ?? "fixed-heights"
-  const { config, preset, updateConfig, applyPreset, resetConfig } = useSandboxConfig(activeScenario)
+  const sandboxConfiguration = useSandboxConfig(activeScenario)
 
   return (
     <div className="app">
@@ -33,7 +36,7 @@ function App() {
           {scenarios.map((scenario) => (
             <NavLink
               key={scenario.id}
-              to={`${scenario.path}${search}`}
+              to={`${scenario.path}${serializeScenarioConfig(scenario.id, parseScenarioConfig(scenario.id, search))}`}
               end
               className={({ isActive }) => `scenario-tab${isActive ? " active" : ""}`}
             >
@@ -50,13 +53,9 @@ function App() {
               path={scenario.path}
               element={
                 <ScenarioExperiment
-                  key={`${scenario.id}:${config.itemCount}`}
+                  key={scenario.id}
                   activeScenario={scenario.id}
-                  preset={preset}
-                  config={config}
-                  updateConfig={updateConfig}
-                  applyPreset={applyPreset}
-                  resetConfig={resetConfig}
+                  {...sandboxConfiguration}
                 />
               }
             />
@@ -80,9 +79,33 @@ function ScenarioExperiment({
   config,
   updateConfig,
   applyPreset,
-  resetConfig,
+  restoreDefaultConfig,
 }: ReturnType<typeof useSandboxConfig> & { activeScenario: ScenarioId }) {
   const [renderedItemCount, setRenderedItemCount] = useState(0)
+  const activeExperimentRef = useRef<ScenarioExperimentHandle>(null)
+  const location = useLocation()
+  const navigationType = useNavigationType()
+  const previousHistoryEntryKey = useRef(location.key)
+  const previousInitialItemCount = useRef(config.itemCount)
+
+  useLayoutEffect(() => {
+    const restoredHistoryEntry = previousHistoryEntryKey.current !== location.key && navigationType === "POP"
+    const initialItemCountChanged = previousInitialItemCount.current !== config.itemCount
+    previousHistoryEntryKey.current = location.key
+    previousInitialItemCount.current = config.itemCount
+    if (restoredHistoryEntry || initialItemCountChanged) {
+      activeExperimentRef.current?.resetExperiment(config)
+    }
+  }, [location.key, navigationType, config])
+
+  function resetExperiment() {
+    activeExperimentRef.current?.resetExperiment(config)
+  }
+
+  function restoreDefaultExperiment() {
+    restoreDefaultConfig()
+    activeExperimentRef.current?.resetExperiment(defaultConfig)
+  }
 
   return (
     <>
@@ -94,6 +117,7 @@ function ScenarioExperiment({
           {(activeScenario === "fixed-heights" ||
             activeScenario === "variable-initial-heights") && (
             <InitialHeightsScenario
+              ref={activeExperimentRef}
               sizing={activeScenario === "fixed-heights" ? "fixed" : "variable"}
               config={config}
               onRenderedItemCountChange={setRenderedItemCount}
@@ -102,6 +126,7 @@ function ScenarioExperiment({
 
           {activeScenario === "changing-heights" && (
             <ChangingSizesScenario
+              ref={activeExperimentRef}
               config={config}
               onRenderedItemCountChange={setRenderedItemCount}
             />
@@ -109,6 +134,7 @@ function ScenarioExperiment({
 
           {activeScenario === "mutations-and-reordering" && (
             <MutationsScenario
+              ref={activeExperimentRef}
               config={config}
               onRenderedItemCountChange={setRenderedItemCount}
             />
@@ -116,6 +142,7 @@ function ScenarioExperiment({
 
           {activeScenario === "drag-and-drop" && (
             <DragAndDropScenario
+              ref={activeExperimentRef}
               config={config}
               onRenderedItemCountChange={setRenderedItemCount}
             />
@@ -133,7 +160,8 @@ function ScenarioExperiment({
             config={config}
             updateConfig={updateConfig}
             applyPreset={applyPreset}
-            resetConfig={resetConfig}
+            restoreDefaultConfig={restoreDefaultExperiment}
+            resetExperiment={resetExperiment}
           />
         </aside>
       </div>
