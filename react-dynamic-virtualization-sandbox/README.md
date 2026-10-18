@@ -19,9 +19,9 @@ The five scenarios use stable identifiers independently of their display labels:
 - `mutations-and-reordering`: Mutations and reordering. Add, remove, move first to end, move last to front, reverse, shuffle, and reset act on the same list. Reset restores the configured initial items and next insertion index.
 - `drag-and-drop`: Drag and drop. Retains native dragging onto another row to reorder.
 
-The scenario identity selects the sizing model; the shared item-sizing selector does not override it. Wiring that selector to scenario-aware configuration remains unfinished. Query parameters are retained during scenario navigation but are not interpreted as configuration.
+The scenario identity selects the sizing model.
 
-Switching scenarios or changing the configured item count remounts the experiment and its rendered-item diagnostics. Configuration persists, while list edits and scroll position reset. Other configuration changes update the current experiment in place.
+Switching scenarios starts a new experiment. Changing the configured item count resets the current experiment in place. List edits and scroll position reset; other configuration changes preserve interaction state.
 
 ## Scenario routes
 
@@ -31,9 +31,9 @@ Vite's default SPA fallback serves these paths in both `npm run dev` and `npm ru
 
 ## Scenario configuration
 
-Configuration and the selected reset preset are stored separately for each scenario.
+The preset selector reflects matching configuration, or Custom for other values.
 Changing the initial item count recreates that scenario's list. Other configuration
-changes preserve its current item order. Navigation still remounts the experiment.
+changes preserve its current item order. Switching scenarios mounts a new experiment.
 
 | Field | Availability | Implemented effect |
 | --- | --- | --- |
@@ -49,15 +49,13 @@ changes preserve its current item order. Navigation still remounts the experimen
 The explicit allowlists in `src/config/controlAvailability.ts` govern rendering and
 configuration updates. Scenario props use narrow configuration types. New controls
 must be opted into their owning scenarios. Rapid Changes is offered only in Changing
-heights; the unwired Extreme Sizes preset has been removed. Reset restores the active
-scenario's selected preset.
+heights; the unwired Extreme Sizes preset has been removed.
 
 ### Variable initial heights
 
 At `/variable`, item count, minimum/maximum height, overscan, and viewport
 height are editable. The default inclusive height bounds are 50–300 CSS pixels. Heights follow a fixed repeating pattern of 32 positions within that range,
-defined in `src/data/createHeightItems.ts` and rounded to integer pixels. Equal bounds produce constant heights. The height inputs advertise a 50–300px range. Finite values apply immediately
-while editing, without strict validation or an error state.
+defined in `src/data/createHeightItems.ts` and rounded to integer pixels. Equal bounds produce constant heights. The height inputs advertise a 50–300px range. Valid integer values apply immediately while editing. Invalid values fall back to defaults.
 
 The provider-independent `createHeightItems` function associates each height
 with `item-N`. The scenario memoizes the dataset by count and bounds;
@@ -68,3 +66,14 @@ fills its container width, like the other scenarios. No automatic resizing is in
 For manual browser geometry checks, compare row heights before and after scrolling
 away and back. Setting both bounds to 80 should produce 80px rows. Height inputs can be edited independently, including temporarily inverted bounds,
 without an error state.
+
+### Shareable experiments
+
+The URL persists configuration for the selected scenario, so reloading or opening it
+in another tab recreates the initial experiment. Default values are omitted; invalid
+values fall back to defaults. Switching scenarios removes irrelevant parameters.
+Control edits replace the current history entry; back and forward restore configuration.
+
+**Reset experiment** recreates the initial experiment using the current configuration.
+**Restore defaults** replaces configuration with scenario defaults and resets the experiment.
+Transient state such as scroll position, list edits, and dragging is not persisted.

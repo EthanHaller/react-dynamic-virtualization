@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef } from "react"
+import type { ScenarioExperimentHandle } from "../types"
+import { useImperativeHandle, useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { ChangingHeightsConfig } from "../../config/types"
 import { createItems } from "../../data"
@@ -7,23 +8,33 @@ import { getAdditionalContent, useChangingSizes } from "./useChangingSizes"
 import "./ChangingSizesScenario.css"
 
 type ChangingSizesScenarioProps = {
+  ref: React.Ref<ScenarioExperimentHandle>
   config: ChangingHeightsConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
 export function ChangingSizesScenario({
+  ref,
   config,
   onRenderedItemCountChange,
 }: ChangingSizesScenarioProps) {
   const renderedItems = useRef(new Set<string>())
+  const scrollElementRef = useRef<HTMLDivElement>(null)
 
   const items = useMemo(() => createItems(config.itemCount), [config.itemCount])
 
-  const expandedItems = useChangingSizes(
+  const { expandedItems, resetSizeChanges } = useChangingSizes(
     config.itemCount,
     config.enableSizeChanges,
     config.changeInterval,
   )
+
+  useImperativeHandle(ref, () => ({
+    resetExperiment(configuration) {
+      resetSizeChanges(configuration)
+      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+    },
+  }), [resetSizeChanges])
 
   const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
@@ -38,6 +49,7 @@ export function ChangingSizesScenario({
   return (
     <div className="changing-sizes-scenario">
       <VirtualizedList
+        scrollElementRef={scrollElementRef}
         items={items}
         getItemId={(item) => item.id}
         height={config.listHeight}

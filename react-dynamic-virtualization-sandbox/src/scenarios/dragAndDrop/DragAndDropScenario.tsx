@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from "react"
+import type { ScenarioExperimentHandle } from "../types"
+import { useImperativeHandle, useCallback, useMemo, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { ListConfig } from "../../config/types"
 import { createItems } from "../../data"
@@ -6,11 +7,13 @@ import type { SandboxItem } from "../../data"
 import "./DragAndDropScenario.css"
 
 type DragAndDropScenarioProps = {
+  ref: React.Ref<ScenarioExperimentHandle>
   config: ListConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
 export function DragAndDropScenario({
+  ref,
   config,
   onRenderedItemCountChange,
 }: DragAndDropScenarioProps) {
@@ -22,7 +25,9 @@ export function DragAndDropScenario({
   const [items, setItems] = useState<SandboxItem[]>(initialItems)
 
   const draggedItemId = useRef<string | null>(null)
+  const [draggedOverItemId, setDraggedOverItemId] = useState<string | null>(null)
   const renderedItems = useRef(new Set<string>())
+  const scrollElementRef = useRef<HTMLDivElement>(null)
 
   const handleDragStart = useCallback((itemId: string) => {
     draggedItemId.current = itemId
@@ -30,6 +35,7 @@ export function DragAndDropScenario({
 
   const handleDragEnd = useCallback(() => {
     draggedItemId.current = null
+    setDraggedOverItemId(null)
   }, [])
 
   const handleDrop = useCallback((targetItemId: string) => {
@@ -39,6 +45,8 @@ export function DragAndDropScenario({
       return
     }
 
+    draggedItemId.current = null
+    setDraggedOverItemId(null)
     setItems((current) => {
       const sourceIndex = current.findIndex((item) => item.id === sourceItemId)
       const targetIndex = current.findIndex((item) => item.id === targetItemId)
@@ -55,6 +63,15 @@ export function DragAndDropScenario({
       return next
     })
   }, [])
+
+  useImperativeHandle(ref, () => ({
+    resetExperiment(configuration) {
+      setItems(createItems(configuration.itemCount))
+      draggedItemId.current = null
+      setDraggedOverItemId(null)
+      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+    },
+  }), [])
 
   const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
@@ -73,6 +90,7 @@ export function DragAndDropScenario({
       </div>
 
       <VirtualizedList
+        scrollElementRef={scrollElementRef}
         items={items}
         getItemId={(item) => item.id}
         height={config.listHeight}
@@ -80,6 +98,9 @@ export function DragAndDropScenario({
         renderItem={(item, { ref, style }) => (
           <DragAndDropItem
             item={item}
+            dragOver={draggedOverItemId === item.id}
+            onDragOver={() => setDraggedOverItemId(item.id)}
+            onDragLeave={() => setDraggedOverItemId(null)}
             ref={(element) => {
               ref(element)
               handleItemRef(item.id, element)
@@ -96,6 +117,9 @@ export function DragAndDropScenario({
 }
 
 type DragAndDropItemProps = {
+  dragOver: boolean
+  onDragOver: () => void
+  onDragLeave: () => void
   item: SandboxItem
   ref: React.Ref<HTMLDivElement>
   style: React.CSSProperties
@@ -105,6 +129,9 @@ type DragAndDropItemProps = {
 }
 
 function DragAndDropItem({
+  dragOver,
+  onDragOver,
+  onDragLeave,
   item,
   ref,
   style,
@@ -112,8 +139,6 @@ function DragAndDropItem({
   onDragEnd,
   onDrop,
 }: DragAndDropItemProps) {
-  const [dragOver, setDragOver] = useState(false)
-
   return (
     <div
       ref={ref}
@@ -125,20 +150,18 @@ function DragAndDropItem({
         onDragStart()
       }}
       onDragEnd={() => {
-        setDragOver(false)
+        onDragLeave()
         onDragEnd()
       }}
       onDragOver={(event) => {
         event.preventDefault()
         event.dataTransfer.dropEffect = "move"
-        setDragOver(true)
+        onDragOver()
       }}
-      onDragLeave={() => {
-        setDragOver(false)
-      }}
+      onDragLeave={onDragLeave}
       onDrop={(event) => {
         event.preventDefault()
-        setDragOver(false)
+        onDragLeave()
         onDrop()
       }}
     >

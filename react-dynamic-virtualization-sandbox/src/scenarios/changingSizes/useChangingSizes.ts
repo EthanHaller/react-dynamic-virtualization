@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import type { ChangingHeightsConfig } from "../../config/types"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 const additionalContent = [
   " Additional content has been added to this item.",
@@ -15,31 +16,38 @@ export function useChangingSizes(
     () => new Set(),
   )
 
+  const activeSizeChangeTimer = useRef<number | undefined>(undefined)
+
+  const stopSizeChanges = useCallback(() => {
+    window.clearInterval(activeSizeChangeTimer.current)
+    activeSizeChangeTimer.current = undefined
+  }, [])
+
+  const startSizeChanges = useCallback((configuration: Pick<ChangingHeightsConfig, "itemCount" | "enableSizeChanges" | "changeInterval">) => {
+    stopSizeChanges()
+    if (!configuration.enableSizeChanges || configuration.itemCount === 0) return
+
+    activeSizeChangeTimer.current = window.setInterval(() => {
+      const expandedItemIndexes = new Set<number>()
+      const expandedItemCount = Math.floor(configuration.itemCount / 2)
+      while (expandedItemIndexes.size < expandedItemCount) {
+        expandedItemIndexes.add(Math.floor(Math.random() * configuration.itemCount))
+      }
+      setExpandedItems(expandedItemIndexes)
+    }, configuration.changeInterval)
+  }, [stopSizeChanges])
+
   useEffect(() => {
-    if (!enabled || itemCount === 0) {
-      return
-    }
+    startSizeChanges({ itemCount, enableSizeChanges: enabled, changeInterval: interval })
+    return stopSizeChanges
+  }, [itemCount, enabled, interval, startSizeChanges, stopSizeChanges])
 
-    const timer = window.setInterval(() => {
-      setExpandedItems(() => {
-        const next = new Set<number>()
-        const expandedCount = Math.floor(itemCount / 2)
+  const resetSizeChanges = useCallback((configuration: ChangingHeightsConfig) => {
+    setExpandedItems(new Set())
+    startSizeChanges(configuration)
+  }, [startSizeChanges])
 
-        while (next.size < expandedCount) {
-          const index = Math.floor(Math.random() * itemCount)
-          next.add(index)
-        }
-
-        return next
-      })
-    }, interval)
-
-    return () => {
-      window.clearInterval(timer)
-    }
-  }, [itemCount, enabled, interval])
-
-  return expandedItems
+  return { expandedItems, resetSizeChanges }
 }
 
 export function getAdditionalContent(index: number): string {

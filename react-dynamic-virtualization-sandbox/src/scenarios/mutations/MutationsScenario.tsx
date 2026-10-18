@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from "react"
+import type { ScenarioExperimentHandle } from "../types"
+import { useImperativeHandle, useCallback, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { ListConfig } from "../../config/types"
 import { createItems } from "../../data"
@@ -6,11 +7,13 @@ import type { SandboxItem } from "../../data"
 import "./MutationsScenario.css"
 
 type MutationsScenarioProps = {
+  ref: React.Ref<ScenarioExperimentHandle>
   config: ListConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
 export function MutationsScenario({
+  ref,
   config,
   onRenderedItemCountChange,
 }: MutationsScenarioProps) {
@@ -20,6 +23,7 @@ export function MutationsScenario({
 
   const nextIndex = useRef(config.itemCount)
   const renderedItems = useRef(new Set<string>())
+  const scrollElementRef = useRef<HTMLDivElement>(null)
 
   const addItem = useCallback(() => {
     const index = nextIndex.current
@@ -86,6 +90,14 @@ export function MutationsScenario({
     nextIndex.current = config.itemCount
     setItems(createItems(config.itemCount))
   }, [config.itemCount])
+
+  useImperativeHandle(ref, () => ({
+    resetExperiment(configuration) {
+      nextIndex.current = configuration.itemCount
+      setItems(createItems(configuration.itemCount))
+      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+    },
+  }), [])
 
   const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
@@ -154,6 +166,7 @@ export function MutationsScenario({
       </div>
 
       <VirtualizedList
+        scrollElementRef={scrollElementRef}
         items={items}
         getItemId={(item) => item.id}
         height={config.listHeight}

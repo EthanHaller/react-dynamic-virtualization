@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef } from "react"
+import type { ScenarioExperimentHandle } from "../types"
+import { useImperativeHandle, useCallback, useMemo, useRef } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import type { InitialHeightsConfig } from "../../config/types"
 import { createHeightItems } from "../../data/createHeightItems"
@@ -7,17 +8,20 @@ import type { SandboxItem } from "../../data"
 import "./InitialHeightsScenario.css"
 
 type InitialHeightsScenarioProps = {
+  ref: React.Ref<ScenarioExperimentHandle>
   sizing: "fixed" | "variable"
   config: InitialHeightsConfig
   onRenderedItemCountChange: (count: number) => void
 }
 
 export function InitialHeightsScenario({
+  ref,
   sizing,
   config,
   onRenderedItemCountChange,
 }: InitialHeightsScenarioProps) {
   const renderedItems = useRef(new Set<string>())
+  const scrollElementRef = useRef<HTMLDivElement>(null)
 
   const { itemCount, minHeight, maxHeight } = config
   const items = useMemo<(SandboxItem & { height?: number })[]>(() => {
@@ -25,6 +29,12 @@ export function InitialHeightsScenario({
     const heightConfig = { itemCount, minHeight, maxHeight }
     return createHeightItems(heightConfig)
   }, [sizing, itemCount, minHeight, maxHeight])
+
+  useImperativeHandle(ref, () => ({
+    resetExperiment() {
+      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+    },
+  }), [])
 
   const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
     if (element) {
@@ -39,6 +49,7 @@ export function InitialHeightsScenario({
   return (
     <div className="initial-height-scenario">
       <VirtualizedList
+        scrollElementRef={scrollElementRef}
         items={items}
         getItemId={(item) => item.id}
         height={config.listHeight}
