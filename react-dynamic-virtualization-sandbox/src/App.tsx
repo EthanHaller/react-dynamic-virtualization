@@ -1,9 +1,11 @@
+import { getListProvider, getUnsupportedScenarioReason } from "./providers/providerRegistry"
 import "./App.css"
 import { parseScenarioConfig, serializeScenarioConfig } from "./config/scenarioQuery"
 import { useLayoutEffect, useRef, useState } from "react"
 import { scenarios, type ScenarioId } from "./routing/scenarioRoutes"
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigationType } from "react-router"
 import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
+import { createRenderedItemCountStore } from "./components/diagnostics/renderedItemCountStore"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
 import { defaultConfig } from "./config/defaultConfig"
@@ -81,7 +83,7 @@ function ScenarioExperiment({
   applyPreset,
   restoreDefaultConfig,
 }: ReturnType<typeof useSandboxConfig> & { activeScenario: ScenarioId }) {
-  const [renderedItemCount, setRenderedItemCount] = useState(0)
+  const [renderedItemDiagnostics] = useState(createRenderedItemCountStore)
   const activeExperimentRef = useRef<ScenarioExperimentHandle>(null)
   const location = useLocation()
   const navigationType = useNavigationType()
@@ -107,6 +109,8 @@ function ScenarioExperiment({
     activeExperimentRef.current?.resetExperiment(defaultConfig)
   }
 
+  const unsupportedReason = getUnsupportedScenarioReason(getListProvider(config.providerId).capabilities, activeScenario)
+
   return (
     <>
       <div className="experiment-layout">
@@ -114,37 +118,42 @@ function ScenarioExperiment({
           <div className="panel-header">
             <h2>Experiment</h2>
           </div>
-          {(activeScenario === "fixed-heights" ||
+          {unsupportedReason && <p role="status">{unsupportedReason}</p>}
+          {!unsupportedReason && (activeScenario === "fixed-heights" ||
             activeScenario === "variable-initial-heights") && (
             <InitialHeightsScenario
+              key={config.providerId}
               ref={activeExperimentRef}
               sizing={activeScenario === "fixed-heights" ? "fixed" : "variable"}
               config={config}
-              onRenderedItemCountChange={setRenderedItemCount}
+              onRenderedItemCountChange={renderedItemDiagnostics.updateRenderedItemCount}
             />
           )}
 
-          {activeScenario === "changing-heights" && (
+          {!unsupportedReason && activeScenario === "changing-heights" && (
             <ChangingSizesScenario
+              key={config.providerId}
               ref={activeExperimentRef}
               config={config}
-              onRenderedItemCountChange={setRenderedItemCount}
+              onRenderedItemCountChange={renderedItemDiagnostics.updateRenderedItemCount}
             />
           )}
 
-          {activeScenario === "mutations-and-reordering" && (
+          {!unsupportedReason && activeScenario === "mutations-and-reordering" && (
             <MutationsScenario
+              key={config.providerId}
               ref={activeExperimentRef}
               config={config}
-              onRenderedItemCountChange={setRenderedItemCount}
+              onRenderedItemCountChange={renderedItemDiagnostics.updateRenderedItemCount}
             />
           )}
 
-          {activeScenario === "drag-and-drop" && (
+          {!unsupportedReason && activeScenario === "drag-and-drop" && (
             <DragAndDropScenario
+              key={config.providerId}
               ref={activeExperimentRef}
               config={config}
-              onRenderedItemCountChange={setRenderedItemCount}
+              onRenderedItemCountChange={renderedItemDiagnostics.updateRenderedItemCount}
             />
           )}
         </section>
@@ -169,7 +178,7 @@ function ScenarioExperiment({
       <DiagnosticsPanel
         config={config}
         sizing={activeScenario === "fixed-heights" ? "fixed" : "variable"}
-        renderedItemCount={renderedItemCount}
+        renderedItemDiagnostics={renderedItemDiagnostics}
       />
     </>
   )

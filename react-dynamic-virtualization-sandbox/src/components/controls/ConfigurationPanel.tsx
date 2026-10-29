@@ -1,9 +1,11 @@
+import { providerDefinitions, getProviderDefinition } from "../../providers/providerDefinitions"
+import { getUnsupportedScenarioReason } from "../../providers/providerRegistry"
 import type { SandboxConfig } from "../../config/types"
 import { InfoTooltip } from "./InfoTooltip"
 import { NumberInput } from "./NumberInput"
 import type { ScenarioId } from "../../routing/scenarioRoutes"
 import { scenarioControls } from "../../config/controlAvailability"
-import { sandboxPresets, type SandboxPreset } from "../../config/presets"
+import { getAvailableSandboxPresets, type SandboxPreset } from "../../config/presets"
 import { PresetSelect } from "./PresetSelect"
 
 type ConfigurationPanelProps = {
@@ -30,9 +32,23 @@ export function ConfigurationPanel({
 }: ConfigurationPanelProps) {
   return (
     <div className="configuration-content">
+      <label className="control" htmlFor="provider">
+        <span className="control-label">Virtualization provider</span>
+        <select id="provider" value={config.providerId} onChange={(event) => {
+          const provider = providerDefinitions.find((provider) => provider.id === event.target.value)
+          if (provider && !getUnsupportedScenarioReason(provider.capabilities, scenario)) updateConfig("providerId", provider.id)
+        }}>
+          {providerDefinitions.map((provider) => {
+            const unsupportedReason = getUnsupportedScenarioReason(provider.capabilities, scenario)
+            return <option key={provider.id} value={provider.id} disabled={!!unsupportedReason}>
+              {provider.label}{unsupportedReason ? ` — ${unsupportedReason}` : ""}
+            </option>
+          })}
+        </select>
+      </label>
       <PresetSelect
         preset={preset}
-        presets={[...(preset.name === "Custom" ? [preset] : []), ...sandboxPresets.filter((preset) => scenario === "changing-heights" || preset.name !== "Rapid Changes")]}
+        presets={[...(preset.name === "Custom" ? [preset] : []), ...getAvailableSandboxPresets(scenario, config.providerId)]}
         onSelect={(preset) => applyPreset(preset)}
       />
 
@@ -56,13 +72,17 @@ export function ConfigurationPanel({
         onChange={(value) => updateConfig("itemSize", value)}
       />}
 
-      {scenarioControls[scenario].includes("overscan") && <NumberInput
-        id="overscan"
-        label="Overscan"
-        value={config.overscan}
-        min={0}
-        onChange={(value) => updateConfig("overscan", value)}
-      />}
+      {getProviderDefinition(config.providerId).settings.map((setting) => <div key={setting.field}>
+        <NumberInput
+          id={setting.field}
+          label={setting.label}
+          value={config[setting.field]}
+          min={setting.min}
+          max={setting.max}
+          onChange={(value) => updateConfig(setting.field, value)}
+        />
+        <span className="control-description">{setting.description}</span>
+      </div>)}
 
       {scenarioControls[scenario].includes("listHeight") && <NumberInput
         id="list-height"

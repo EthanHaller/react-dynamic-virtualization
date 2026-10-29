@@ -1,6 +1,7 @@
 import type { ScenarioExperimentHandle } from "../types"
-import { useImperativeHandle, useCallback, useRef, useState } from "react"
-import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
+import { memo, useImperativeHandle, useCallback, useRef, useState } from "react"
+import { ScenarioList } from "../../providers/ScenarioList"
+import type { ProviderListHandle } from "../../providers/types"
 import type { ListConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
@@ -22,8 +23,7 @@ export function MutationsScenario({
   )
 
   const nextIndex = useRef(config.itemCount)
-  const renderedItems = useRef(new Set<string>())
-  const scrollElementRef = useRef<HTMLDivElement>(null)
+  const providerListRef = useRef<ProviderListHandle>(null)
 
   const addItem = useCallback(() => {
     const index = nextIndex.current
@@ -95,19 +95,9 @@ export function MutationsScenario({
     resetExperiment(configuration) {
       nextIndex.current = configuration.itemCount
       setItems(createItems(configuration.itemCount))
-      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+      providerListRef.current?.scrollToOffset?.(0)
     },
   }), [])
-
-  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
-    if (element) {
-      renderedItems.current.add(itemId)
-    } else {
-      renderedItems.current.delete(itemId)
-    }
-
-    onRenderedItemCountChange(renderedItems.current.size)
-  }, [onRenderedItemCountChange])
 
   return (
     <div className="mutations-scenario">
@@ -165,40 +155,23 @@ export function MutationsScenario({
         </span>
       </div>
 
-      <VirtualizedList
-        scrollElementRef={scrollElementRef}
+      <ScenarioList
+        ref={providerListRef}
         items={items}
-        getItemId={(item) => item.id}
-        height={config.listHeight}
-        overscan={config.overscan}
-        renderItem={(item, { ref, style }) => (
-          <MutationItem
-            item={item}
-            ref={(element) => {
-              ref(element)
-              handleItemRef(item.id, element)
-            }}
-            style={style}
-          />
-        )}
+        config={config}
+        onRenderedItemCountChange={onRenderedItemCountChange}
+        getRowPresentation={() => ({ className: "mutation-item" })}
+        renderRowBody={(item) => <MutationItemBody item={item} />}
       />
     </div>
   )
 }
 
-type MutationItemProps = {
-  item: SandboxItem
-  ref: React.Ref<HTMLDivElement>
-  style: React.CSSProperties
-}
-
-function MutationItem({ item, ref, style }: MutationItemProps) {
+const MutationItemBody = memo(function MutationItemBody({ item }: { item: SandboxItem }) {
   return (
-    <div ref={ref} className="mutation-item" style={style}>
       <div className="mutation-item-content">
         <span className="mutation-item-index">#{item.index}</span>
         <span>{item.content}</span>
       </div>
-    </div>
   )
-}
+})
