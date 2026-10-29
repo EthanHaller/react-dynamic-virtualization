@@ -1,6 +1,7 @@
 import type { ScenarioExperimentHandle } from "../types"
-import { useImperativeHandle, useCallback, useMemo, useRef } from "react"
-import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
+import { memo, useImperativeHandle, useMemo, useRef } from "react"
+import { ScenarioList } from "../../providers/ScenarioList"
+import type { ProviderListHandle } from "../../providers/types"
 import type { ChangingHeightsConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
@@ -18,8 +19,7 @@ export function ChangingSizesScenario({
   config,
   onRenderedItemCountChange,
 }: ChangingSizesScenarioProps) {
-  const renderedItems = useRef(new Set<string>())
-  const scrollElementRef = useRef<HTMLDivElement>(null)
+  const providerListRef = useRef<ProviderListHandle>(null)
 
   const items = useMemo(() => createItems(config.itemCount), [config.itemCount])
 
@@ -32,59 +32,26 @@ export function ChangingSizesScenario({
   useImperativeHandle(ref, () => ({
     resetExperiment(configuration) {
       resetSizeChanges(configuration)
-      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+      providerListRef.current?.scrollToOffset?.(0)
     },
   }), [resetSizeChanges])
 
-  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
-    if (element) {
-      renderedItems.current.add(itemId)
-    } else {
-      renderedItems.current.delete(itemId)
-    }
-
-    onRenderedItemCountChange(renderedItems.current.size)
-  }, [onRenderedItemCountChange])
-
   return (
     <div className="changing-sizes-scenario">
-      <VirtualizedList
-        scrollElementRef={scrollElementRef}
+      <ScenarioList
+        ref={providerListRef}
         items={items}
-        getItemId={(item) => item.id}
-        height={config.listHeight}
-        overscan={config.overscan}
-        renderItem={(item, { ref, style }) => (
-          <ChangingSizeItem
-            item={item}
-            expanded={expandedItems.has(item.index)}
-            ref={(element) => {
-              ref(element)
-              handleItemRef(item.id, element)
-            }}
-            style={style}
-          />
-        )}
+        config={config}
+        onRenderedItemCountChange={onRenderedItemCountChange}
+        getRowPresentation={() => ({ className: "changing-size-item" })}
+        renderRowBody={(item) => <ChangingSizeItemBody item={item} expanded={expandedItems.has(item.index)} />}
       />
     </div>
   )
 }
 
-type ChangingSizeItemProps = {
-  item: SandboxItem
-  expanded: boolean
-  ref: React.Ref<HTMLDivElement>
-  style: React.CSSProperties
-}
-
-function ChangingSizeItem({
-  item,
-  expanded,
-  ref,
-  style,
-}: ChangingSizeItemProps) {
+const ChangingSizeItemBody = memo(function ChangingSizeItemBody({ item, expanded }: { item: SandboxItem; expanded: boolean }) {
   return (
-    <div ref={ref} className="changing-size-item" style={style}>
       <div className="changing-size-item-content">
         <div className="changing-size-item-header">
           <span className="changing-size-item-index">#{item.index}</span>
@@ -98,6 +65,5 @@ function ChangingSizeItem({
 
         {expanded && <span>{getAdditionalContent(item.index)}</span>}
       </div>
-    </div>
   )
-}
+})

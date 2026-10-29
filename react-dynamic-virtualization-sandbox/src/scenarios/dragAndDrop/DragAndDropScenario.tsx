@@ -1,6 +1,7 @@
 import type { ScenarioExperimentHandle } from "../types"
-import { useImperativeHandle, useCallback, useMemo, useRef, useState } from "react"
-import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
+import { memo, useImperativeHandle, useCallback, useMemo, useRef, useState } from "react"
+import { ScenarioList } from "../../providers/ScenarioList"
+import type { ProviderListHandle } from "../../providers/types"
 import type { ListConfig } from "../../config/types"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
@@ -26,8 +27,7 @@ export function DragAndDropScenario({
 
   const draggedItemId = useRef<string | null>(null)
   const [draggedOverItemId, setDraggedOverItemId] = useState<string | null>(null)
-  const renderedItems = useRef(new Set<string>())
-  const scrollElementRef = useRef<HTMLDivElement>(null)
+  const providerListRef = useRef<ProviderListHandle>(null)
 
   const handleDragStart = useCallback((itemId: string) => {
     draggedItemId.current = itemId
@@ -69,19 +69,9 @@ export function DragAndDropScenario({
       setItems(createItems(configuration.itemCount))
       draggedItemId.current = null
       setDraggedOverItemId(null)
-      scrollElementRef.current?.scrollTo({ top: 0, behavior: "instant" })
+      providerListRef.current?.scrollToOffset?.(0)
     },
   }), [])
-
-  const handleItemRef = useCallback((itemId: string, element: HTMLDivElement | null) => {
-    if (element) {
-      renderedItems.current.add(itemId)
-    } else {
-      renderedItems.current.delete(itemId)
-    }
-
-    onRenderedItemCountChange(renderedItems.current.size)
-  }, [onRenderedItemCountChange])
 
   return (
     <div className="drag-and-drop-scenario">
@@ -89,82 +79,39 @@ export function DragAndDropScenario({
         Drag an item onto another item to reorder the list.
       </div>
 
-      <VirtualizedList
-        scrollElementRef={scrollElementRef}
+      <ScenarioList
+        ref={providerListRef}
         items={items}
-        getItemId={(item) => item.id}
-        height={config.listHeight}
-        overscan={config.overscan}
-        renderItem={(item, { ref, style }) => (
-          <DragAndDropItem
-            item={item}
-            dragOver={draggedOverItemId === item.id}
-            onDragOver={() => setDraggedOverItemId(item.id)}
-            onDragLeave={() => setDraggedOverItemId(null)}
-            ref={(element) => {
-              ref(element)
-              handleItemRef(item.id, element)
-            }}
-            style={style}
-            onDragStart={() => handleDragStart(item.id)}
-            onDragEnd={handleDragEnd}
-            onDrop={() => handleDrop(item.id)}
-          />
-        )}
+        config={config}
+        onRenderedItemCountChange={onRenderedItemCountChange}
+        getRowPresentation={(item) => ({
+          className: `drag-and-drop-item${draggedOverItemId === item.id ? " drag-over" : ""}`,
+          draggable: true,
+          onDragStart: (event) => {
+            event.dataTransfer.effectAllowed = "move"
+            handleDragStart(item.id)
+          },
+          onDragEnd: handleDragEnd,
+          onDragOver: (event) => {
+            event.preventDefault()
+            event.dataTransfer.dropEffect = "move"
+            setDraggedOverItemId(item.id)
+          },
+          onDragLeave: () => setDraggedOverItemId(null),
+          onDrop: (event) => {
+            event.preventDefault()
+            setDraggedOverItemId(null)
+            handleDrop(item.id)
+          },
+        })}
+        renderRowBody={(item) => <DragAndDropItemBody item={item} />}
       />
     </div>
   )
 }
 
-type DragAndDropItemProps = {
-  dragOver: boolean
-  onDragOver: () => void
-  onDragLeave: () => void
-  item: SandboxItem
-  ref: React.Ref<HTMLDivElement>
-  style: React.CSSProperties
-  onDragStart: () => void
-  onDragEnd: () => void
-  onDrop: () => void
-}
-
-function DragAndDropItem({
-  dragOver,
-  onDragOver,
-  onDragLeave,
-  item,
-  ref,
-  style,
-  onDragStart,
-  onDragEnd,
-  onDrop,
-}: DragAndDropItemProps) {
+const DragAndDropItemBody = memo(function DragAndDropItemBody({ item }: { item: SandboxItem }) {
   return (
-    <div
-      ref={ref}
-      className={`drag-and-drop-item${dragOver ? " drag-over" : ""}`}
-      style={style}
-      draggable
-      onDragStart={(event) => {
-        event.dataTransfer.effectAllowed = "move"
-        onDragStart()
-      }}
-      onDragEnd={() => {
-        onDragLeave()
-        onDragEnd()
-      }}
-      onDragOver={(event) => {
-        event.preventDefault()
-        event.dataTransfer.dropEffect = "move"
-        onDragOver()
-      }}
-      onDragLeave={onDragLeave}
-      onDrop={(event) => {
-        event.preventDefault()
-        onDragLeave()
-        onDrop()
-      }}
-    >
       <div className="drag-and-drop-item-content">
         <span className="drag-handle" aria-hidden="true">
           ⋮⋮
@@ -174,6 +121,5 @@ function DragAndDropItem({
 
         <span>{item.content}</span>
       </div>
-    </div>
   )
-}
+})

@@ -1,4 +1,9 @@
+import type { ProviderId } from "../providers/providerDefinitions"
+
 export type SandboxConfig = {
+  providerId: ProviderId
+  estimatedItemHeight: number
+  bufferSize: number
   minHeight: number
   maxHeight: number
   itemCount: number
@@ -9,6 +14,6 @@ export type SandboxConfig = {
   changeInterval: number
 }
 
-export type ListConfig = Pick<SandboxConfig, "itemCount" | "overscan" | "listHeight">
+export type ListConfig = Pick<SandboxConfig, "itemCount" | "overscan" | "listHeight" | "providerId" | "estimatedItemHeight" | "bufferSize">
 export type InitialHeightsConfig = ListConfig & Pick<SandboxConfig, "itemSize" | "minHeight" | "maxHeight">
 export type ChangingHeightsConfig = ListConfig & Pick<SandboxConfig, "enableSizeChanges" | "changeInterval">

@@ -1,17 +1,22 @@
+import { useSyncExternalStore } from "react"
+import type { RenderedItemCountStore } from "./renderedItemCountStore"
+import { getProviderDefinition } from "../../providers/providerDefinitions"
 import type { SandboxConfig } from "../../config/types"
 import "./DiagnosticsPanel.css"
 
 type DiagnosticsPanelProps = {
   sizing: "fixed" | "variable"
   config: SandboxConfig
-  renderedItemCount: number
+  renderedItemDiagnostics: RenderedItemCountStore
 }
 
 export function DiagnosticsPanel({
   sizing,
   config,
-  renderedItemCount,
+  renderedItemDiagnostics,
 }: DiagnosticsPanelProps) {
+  const renderedItemCount = useSyncExternalStore(renderedItemDiagnostics.subscribe, renderedItemDiagnostics.getSnapshot)
+
   return (
     <section className="panel diagnostics-panel">
       <div className="panel-header">
@@ -21,7 +26,10 @@ export function DiagnosticsPanel({
       <div className="diagnostics-content">
         <DiagnosticValue label="Items" value={config.itemCount} />
         <DiagnosticValue label="Rendered" value={renderedItemCount} />
-        <DiagnosticValue label="Overscan" value={config.overscan} />
+        <DiagnosticValue label="Provider" value={getProviderDefinition(config.providerId).label} />
+        {getProviderDefinition(config.providerId).settings.map((setting) => (
+          <DiagnosticValue key={setting.field} label={setting.label} value={config[setting.field]} />
+        ))}
         <DiagnosticValue label="List height" value={`${config.listHeight}px`} />
         <DiagnosticValue label="Sizing" value={sizing} />
       </div>
