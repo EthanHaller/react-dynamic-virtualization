@@ -2,6 +2,10 @@ import { useRef } from "react"
 import { PositionStore } from "../position/positionStore"
 
 function areItemIdsEqual(previousIds: string[], nextIds: string[]): boolean {
+  if (previousIds === nextIds) {
+    return true
+  }
+
   if (previousIds.length !== nextIds.length) {
     return false
   }
