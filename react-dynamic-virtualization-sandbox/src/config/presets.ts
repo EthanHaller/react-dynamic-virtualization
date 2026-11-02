@@ -1,6 +1,6 @@
 import { getProviderDefinition, type ProviderId } from "../providers/providerDefinitions"
 import type { ScenarioId } from "../routing/scenarioRoutes"
-import { defaultConfig } from "./defaultConfig"
+import { defaultConfig, getScenarioDefaults } from "./defaultConfig"
 import type { SandboxConfig } from "./types"
 
 export type SandboxPreset = {
@@ -21,8 +21,6 @@ export const sandboxPresets: SandboxPreset[] = [
       itemSize: 80,
       overscan: 2,
       listHeight: 500,
-      enableSizeChanges: true,
-      changeInterval: 1_000,
     },
   },
   {
@@ -36,8 +34,6 @@ export const sandboxPresets: SandboxPreset[] = [
       itemSize: 80,
       overscan: 5,
       listHeight: 400,
-      enableSizeChanges: false,
-      changeInterval: 1_000,
     },
   },
   {
@@ -51,8 +47,6 @@ export const sandboxPresets: SandboxPreset[] = [
       itemSize: 80,
       overscan: 50,
       listHeight: 500,
-      enableSizeChanges: false,
-      changeInterval: 1_000,
     },
   },
   {
@@ -65,9 +59,9 @@ export const sandboxPresets: SandboxPreset[] = [
       itemCount: 10_000,
       itemSize: 80,
       overscan: 5,
-      listHeight: 500,
-      enableSizeChanges: true,
-      changeInterval: 250,
+      listHeight: 600,
+      payloadUpdateInterval: 16,
+      payloadUpdateBatchSize: 4,
     },
   },
 ]
@@ -77,5 +71,5 @@ export function getAvailableSandboxPresets(scenario: ScenarioId, providerId: Pro
   return sandboxPresets.filter((preset) =>
     (scenario === "changing-heights" || preset.name !== "Rapid Changes") &&
     (supportsItemOverscan || preset.name !== "High Overscan"),
-  )
+  ).map((preset) => preset.name === "Default" ? { ...preset, config: getScenarioDefaults(scenario) } : preset)
 }

@@ -8,9 +8,11 @@ import { DiagnosticsPanel } from "./components/diagnostics/DiagnosticsPanel"
 import { createRenderedItemCountStore } from "./components/diagnostics/renderedItemCountStore"
 import { ConfigurationPanel } from "./components/controls/ConfigurationPanel"
 import { useSandboxConfig } from "./config/useSandboxConfig"
-import { defaultConfig } from "./config/defaultConfig"
+import { getScenarioDefaults } from "./config/defaultConfig"
 import type { ScenarioExperimentHandle } from "./scenarios/types"
 import { InitialHeightsScenario } from "./scenarios/initialHeights/InitialHeightsScenario"
+import { createPayloadUpdateRun } from "./scenarios/changingSizes/createPayloadUpdateRun"
+import { PayloadUpdateRunControls, PayloadUpdateRunDiagnostics } from "./scenarios/changingSizes/PayloadUpdateRunControls"
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
 import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario"
@@ -84,6 +86,7 @@ function ScenarioExperiment({
   restoreDefaultConfig,
 }: ReturnType<typeof useSandboxConfig> & { activeScenario: ScenarioId }) {
   const [renderedItemDiagnostics] = useState(createRenderedItemCountStore)
+  const [payloadUpdateRun] = useState(() => activeScenario === "changing-heights" ? createPayloadUpdateRun() : undefined)
   const activeExperimentRef = useRef<ScenarioExperimentHandle>(null)
   const location = useLocation()
   const navigationType = useNavigationType()
@@ -106,7 +109,7 @@ function ScenarioExperiment({
 
   function restoreDefaultExperiment() {
     restoreDefaultConfig()
-    activeExperimentRef.current?.resetExperiment(defaultConfig)
+    activeExperimentRef.current?.resetExperiment(getScenarioDefaults(activeScenario))
   }
 
   const unsupportedReason = getUnsupportedScenarioReason(getListProvider(config.providerId).capabilities, activeScenario)
@@ -130,8 +133,9 @@ function ScenarioExperiment({
             />
           )}
 
-          {!unsupportedReason && activeScenario === "changing-heights" && (
+          {!unsupportedReason && activeScenario === "changing-heights" && payloadUpdateRun && (
             <ChangingSizesScenario
+              payloadUpdateRun={payloadUpdateRun}
               key={config.providerId}
               ref={activeExperimentRef}
               config={config}
@@ -171,15 +175,19 @@ function ScenarioExperiment({
             applyPreset={applyPreset}
             restoreDefaultConfig={restoreDefaultExperiment}
             resetExperiment={resetExperiment}
+            experimentActions={payloadUpdateRun && !unsupportedReason && (
+              <PayloadUpdateRunControls
+                payloadUpdateRun={payloadUpdateRun}
+                startRun={() => activeExperimentRef.current?.startRun?.()}
+              />
+            )}
           />
         </aside>
       </div>
 
-      <DiagnosticsPanel
-        config={config}
-        sizing={activeScenario === "fixed-heights" ? "fixed" : "variable"}
-        renderedItemDiagnostics={renderedItemDiagnostics}
-      />
+      <DiagnosticsPanel renderedItemDiagnostics={renderedItemDiagnostics}>
+        {payloadUpdateRun && <PayloadUpdateRunDiagnostics payloadUpdateRun={payloadUpdateRun} />}
+      </DiagnosticsPanel>
     </>
   )
 }

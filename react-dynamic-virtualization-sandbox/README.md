@@ -11,17 +11,17 @@ test configuration to accommodate sandbox imports.
 
 ## Scenario implementation
 
-The five scenarios use stable identifiers independently of their display labels:
+The scenarios use stable identifiers independently of their display labels:
 
 - `fixed-heights`: Fixed heights. Rows use the configured item size and clip overflowing content.
 - `variable-initial-heights`: Variable initial heights. Rows use stable heights from a fixed repeating pattern scaled to the configured bounds.
-- `changing-heights`: Changing heights. Retains timed content expansion, controlled by the size-change toggle and interval.
+- `changing-heights`: Changing heights. Stable event records with deterministic payload expansion at the beginning of the list. Start run resets and applies 200 batches; Stop retains results; Reset experiment restores compact, stopped records. Workload edits reset the run.
 - `mutations-and-reordering`: Mutations and reordering. Add, remove, move first to end, move last to front, reverse, shuffle, and reset act on the same list. Reset restores the configured initial items and next insertion index.
 - `drag-and-drop`: Drag and drop. Retains native dragging onto another row to reorder.
 
 The scenario identity selects the sizing model.
 
-Switching scenarios starts a new experiment. Changing the configured item count resets the current experiment in place. List edits and scroll position reset; other configuration changes preserve interaction state.
+Switching scenarios starts a new experiment. Changing the configured item count resets the current experiment in place. List edits and scroll position reset; other configuration changes preserve interaction state except for Changing heights workload edits.
 
 ## Scenario routes
 
@@ -41,8 +41,9 @@ changes preserve its current item order. Switching scenarios mounts a new experi
 | `overscan` | All scenarios with React Dynamic Virtualization or TanStack Virtual | Adds rendered items around the viewport |
 | `listHeight` | All scenarios | Sets the scroll viewport height in pixels |
 | `itemSize` | Fixed heights | Sets each row's border-box height in pixels |
-| `enableSizeChanges` | Changing heights | Starts/pauses random expansion updates; pausing retains current heights |
-| `changeInterval` | Changing heights, while updates are enabled | Sets update frequency in milliseconds |
+| `workloadSeed` | Changing heights | Reproduces the payload sequence |
+| `payloadUpdateBatchSize` | Changing heights | Updates the first 1–1,000 records |
+| `payloadUpdateInterval` | Changing heights | Requested milliseconds between batches; never starts automatically |
 | `itemSizing` | Removed | Route already determines sizing; the field was unwired |
 | `minItemSize`, `maxItemSize` | Removed | No scenario consumed these fields |
 
@@ -87,7 +88,7 @@ scroll integration. Adapters reuse the visual row body without requiring identic
 DOM structures or adding abstraction-only wrappers. The virtualization library
 remains entirely separate and unchanged.
 
-React Dynamic Virtualization, TanStack Virtual, and Virtua support all five scenarios.
+React Dynamic Virtualization, TanStack Virtual, and Virtua support all scenarios.
 The registry declares capabilities explicitly; unsupported combinations are disabled
 with a reason. Viewport DOM access is optional (Virtua exposes scrolling through its
 native handle instead). Rendered-item diagnostics count mounted logical rows,

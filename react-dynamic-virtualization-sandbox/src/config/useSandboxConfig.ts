@@ -1,7 +1,7 @@
 import { getProviderDefinition } from "../providers/providerDefinitions"
 import type { ScenarioId } from "../routing/scenarioRoutes"
 import { scenarioControls } from "./controlAvailability"
-import { defaultConfig } from "./defaultConfig"
+import { getScenarioDefaults } from "./defaultConfig"
 import { getAvailableSandboxPresets, type SandboxPreset } from "./presets"
 import { usePersistedScenarioConfig } from "./usePersistedScenarioConfig"
 import type { SandboxConfig } from "./types"
@@ -23,7 +23,7 @@ export function useSandboxConfig(scenario: ScenarioId) {
   }
 
   function restoreDefaultConfig() {
-    persistScenarioConfig(defaultConfig)
+    persistScenarioConfig(getScenarioDefaults(scenario))
   }
 
   return { config, preset, updateConfig, applyPreset, restoreDefaultConfig }
