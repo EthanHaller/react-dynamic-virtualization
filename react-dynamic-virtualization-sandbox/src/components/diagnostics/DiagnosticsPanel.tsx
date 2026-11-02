@@ -1,18 +1,14 @@
-import { useSyncExternalStore } from "react"
+import { useSyncExternalStore, type ReactNode } from "react"
 import type { RenderedItemCountStore } from "./renderedItemCountStore"
-import { getProviderDefinition } from "../../providers/providerDefinitions"
-import type { SandboxConfig } from "../../config/types"
 import "./DiagnosticsPanel.css"
 
 type DiagnosticsPanelProps = {
-  sizing: "fixed" | "variable"
-  config: SandboxConfig
+  children?: ReactNode
   renderedItemDiagnostics: RenderedItemCountStore
 }
 
 export function DiagnosticsPanel({
-  sizing,
-  config,
+  children,
   renderedItemDiagnostics,
 }: DiagnosticsPanelProps) {
   const renderedItemCount = useSyncExternalStore(renderedItemDiagnostics.subscribe, renderedItemDiagnostics.getSnapshot)
@@ -24,15 +20,9 @@ export function DiagnosticsPanel({
       </div>
 
       <div className="diagnostics-content">
-        <DiagnosticValue label="Items" value={config.itemCount} />
         <DiagnosticValue label="Rendered" value={renderedItemCount} />
-        <DiagnosticValue label="Provider" value={getProviderDefinition(config.providerId).label} />
-        {getProviderDefinition(config.providerId).settings.map((setting) => (
-          <DiagnosticValue key={setting.field} label={setting.label} value={config[setting.field]} />
-        ))}
-        <DiagnosticValue label="List height" value={`${config.listHeight}px`} />
-        <DiagnosticValue label="Sizing" value={sizing} />
       </div>
+      {children}
     </section>
   )
 }
@@ -42,7 +32,7 @@ type DiagnosticValueProps = {
   value: string | number
 }
 
-function DiagnosticValue({ label, value }: DiagnosticValueProps) {
+export function DiagnosticValue({ label, value }: DiagnosticValueProps) {
   return (
     <div className="diagnostic-value">
       <span>{label}</span>

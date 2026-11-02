@@ -10,10 +10,11 @@ export type SandboxConfig = {
   itemSize: number
   overscan: number
   listHeight: number
-  enableSizeChanges: boolean
-  changeInterval: number
+  workloadSeed: number
+  payloadUpdateBatchSize: number
+  payloadUpdateInterval: number
 }
 
 export type ListConfig = Pick<SandboxConfig, "itemCount" | "overscan" | "listHeight" | "providerId" | "estimatedItemHeight" | "bufferSize">
 export type InitialHeightsConfig = ListConfig & Pick<SandboxConfig, "itemSize" | "minHeight" | "maxHeight">
-export type ChangingHeightsConfig = ListConfig & Pick<SandboxConfig, "enableSizeChanges" | "changeInterval">
+export type ChangingHeightsConfig = ListConfig & Pick<SandboxConfig, "workloadSeed" | "payloadUpdateBatchSize" | "payloadUpdateInterval">

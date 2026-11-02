@@ -1,3 +1,4 @@
+import type { ScenarioId } from "../routing/scenarioRoutes"
 import type { SandboxConfig } from "./types"
 
 export const defaultConfig: SandboxConfig = {
@@ -10,6 +11,11 @@ export const defaultConfig: SandboxConfig = {
   itemSize: 80,
   overscan: 2,
   listHeight: 500,
-  enableSizeChanges: true,
-  changeInterval: 1_000,
+  workloadSeed: 1,
+  payloadUpdateBatchSize: 1,
+  payloadUpdateInterval: 100,
+}
+
+export function getScenarioDefaults(scenario: ScenarioId): SandboxConfig {
+  return scenario === "changing-heights" ? { ...defaultConfig, itemCount: 10_000, listHeight: 600 } : defaultConfig
 }

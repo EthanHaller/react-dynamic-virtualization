@@ -1,14 +1,15 @@
+import type { ReactNode } from "react"
 import { providerDefinitions, getProviderDefinition } from "../../providers/providerDefinitions"
 import { getUnsupportedScenarioReason } from "../../providers/providerRegistry"
 import type { SandboxConfig } from "../../config/types"
-import { InfoTooltip } from "./InfoTooltip"
 import { NumberInput } from "./NumberInput"
 import type { ScenarioId } from "../../routing/scenarioRoutes"
-import { scenarioControls } from "../../config/controlAvailability"
+import { getScenarioNumberConstraints, scenarioControls } from "../../config/controlAvailability"
 import { getAvailableSandboxPresets, type SandboxPreset } from "../../config/presets"
 import { PresetSelect } from "./PresetSelect"
 
 type ConfigurationPanelProps = {
+  experimentActions?: ReactNode
   scenario: ScenarioId
   preset: SandboxPreset
   config: SandboxConfig
@@ -29,6 +30,7 @@ export function ConfigurationPanel({
   applyPreset,
   restoreDefaultConfig,
   resetExperiment,
+  experimentActions,
 }: ConfigurationPanelProps) {
   return (
     <div className="configuration-content">
@@ -52,23 +54,25 @@ export function ConfigurationPanel({
         onSelect={(preset) => applyPreset(preset)}
       />
 
+      {experimentActions}
+
       {scenarioControls[scenario].includes("itemCount") && <NumberInput
         id="item-count"
         label={scenario === "mutations-and-reordering" || scenario === "drag-and-drop" ? "Initial items" : "Items"}
         value={config.itemCount}
-        min={scenario === "fixed-heights" || scenario === "variable-initial-heights" ? 0 : 1}
+        {...getScenarioNumberConstraints(scenario, "itemCount")}
         onChange={(value) => updateConfig("itemCount", value)}
       />}
 
-      {([ ["minHeight", "Minimum height (px)", 50, 300], ["maxHeight", "Maximum height (px)", 50, 300] ] as const).map(([key, label, min, max]) => scenarioControls[scenario].includes(key) && (
-        <NumberInput key={key} id={key} label={label} value={config[key]} min={min} max={max} onChange={(value) => updateConfig(key, value)} />
+      {([ ["minHeight", "Minimum height (px)"], ["maxHeight", "Maximum height (px)"] ] as const).map(([key, label]) => scenarioControls[scenario].includes(key) && (
+        <NumberInput key={key} id={key} label={label} value={config[key]} {...getScenarioNumberConstraints(scenario, key)} onChange={(value) => updateConfig(key, value)} />
       ))}
 
       {scenarioControls[scenario].includes("itemSize") && <NumberInput
         id="item-size"
         label="Item height (px)"
         value={config.itemSize}
-        min={1}
+        {...getScenarioNumberConstraints(scenario, "itemSize")}
         onChange={(value) => updateConfig("itemSize", value)}
       />}
 
@@ -88,34 +92,34 @@ export function ConfigurationPanel({
         id="list-height"
         label="List height (px)"
         value={config.listHeight}
-        min={100}
+        {...getScenarioNumberConstraints(scenario, "listHeight")}
         onChange={(value) => updateConfig("listHeight", value)}
       />}
 
-      {scenarioControls[scenario].includes("changeInterval") && config.enableSizeChanges && <NumberInput
-        id="change-interval"
-        label="Change interval (ms)"
-        value={config.changeInterval}
-        min={100}
-        step={100}
-        onChange={(value) => updateConfig("changeInterval", value)}
-      />}
-
-      {scenarioControls[scenario].includes("enableSizeChanges") && <label className="control control-checkbox" htmlFor="enable-size-changes">
-        <input
-          id="enable-size-changes"
-          name="enable-size-changes"
-          type="checkbox"
-          checked={config.enableSizeChanges}
-          onChange={(event) =>
-            updateConfig("enableSizeChanges", event.target.checked)
-          }
+      {scenarioControls[scenario].includes("workloadSeed") && <div>
+        <NumberInput
+          id="workload-seed"
+          label="Payload seed"
+          value={config.workloadSeed}
+          {...getScenarioNumberConstraints(scenario, "workloadSeed")}
+          onChange={(value) => updateConfig("workloadSeed", value)}
         />
-
-        <span className="control-label">Automatic size changes</span>
-
-        <InfoTooltip content="Selects half the items to expand at each interval. Turning this off pauses changes and keeps the current heights." />
-      </label>}
+        <span className="control-description">The same seed repeats the same payload changes across providers.</span>
+      </div>}
+      {scenarioControls[scenario].includes("payloadUpdateBatchSize") && <NumberInput
+        id="payload-batch-size"
+        label="Rows to update"
+        value={config.payloadUpdateBatchSize}
+        {...getScenarioNumberConstraints(scenario, "payloadUpdateBatchSize")}
+        onChange={(value) => updateConfig("payloadUpdateBatchSize", value)}
+      />}
+      {scenarioControls[scenario].includes("payloadUpdateInterval") && <NumberInput
+        id="payload-update-interval"
+        label="Requested update interval (ms)"
+        value={config.payloadUpdateInterval}
+        {...getScenarioNumberConstraints(scenario, "payloadUpdateInterval")}
+        onChange={(value) => updateConfig("payloadUpdateInterval", value)}
+      />}
 
       <button type="button" onClick={resetExperiment}>Reset experiment</button>
       <button type="button" onClick={restoreDefaultConfig}>Restore defaults</button>
