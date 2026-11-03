@@ -15,7 +15,7 @@ The scenarios use stable identifiers independently of their display labels:
 
 - `fixed-heights`: Fixed heights. Rows use the configured item size and clip overflowing content.
 - `variable-initial-heights`: Variable initial heights. Rows use stable heights from a fixed repeating pattern scaled to the configured bounds.
-- `changing-heights`: Changing heights. Stable event records with deterministic payload expansion at the beginning of the list. Start run resets and applies 200 batches; Stop retains results; Reset experiment restores compact, stopped records. Workload edits reset the run.
+- `changing-heights`: Changing heights. Stable event records with deterministic payload expansion at the beginning of the list. Start run resets and applies 200 batches; Stop retains results; Reset experiment restores compact, stopped records. Workload edits reset the run. See [dynamic-height performance comparison](DYNAMIC_HEIGHT_PERFORMANCE_COMPARISON.md).
 - `mutations-and-reordering`: Mutations and reordering. Add, remove, move first to end, move last to front, reverse, shuffle, and reset act on the same list. Reset restores the configured initial items and next insertion index.
 - `drag-and-drop`: Drag and drop. Retains native dragging onto another row to reorder.
 
