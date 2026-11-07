@@ -27,9 +27,9 @@ export function usePositionStore(itemIds: string[]): PositionStore {
     storeRef.current = new PositionStore(itemIds)
     itemIdsRef.current = itemIds
   } else if (!areItemIdsEqual(itemIdsRef.current, itemIds)) {
-    const previousHeights = storeRef.current.getHeights()
+    const previousSizes = storeRef.current.getSizes()
 
-    storeRef.current = new PositionStore(itemIds, previousHeights)
+    storeRef.current = new PositionStore(itemIds, previousSizes)
 
     itemIdsRef.current = itemIds
   }

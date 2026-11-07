@@ -4,10 +4,10 @@ import { PositionTree } from "../../src/position/positionTree"
 
 const itemIds = ["a", "b", "c", "d"]
 
-const heights = [10, 20, 30, 40]
+const sizes = [10, 20, 30, 40]
 
 const createTree = () => {
-  return new PositionTree(itemIds, heights)
+  return new PositionTree(itemIds, sizes)
 }
 
 describe("PositionTree", () => {
@@ -58,75 +58,75 @@ describe("PositionTree", () => {
     })
   })
 
-  describe("getTotalHeight", () => {
-    it("returns the sum of all item heights", () => {
+  describe("getTotalSize", () => {
+    it("returns the sum of all item sizes", () => {
       const tree = createTree()
 
-      expect(tree.getTotalHeight()).toBe(100)
+      expect(tree.getTotalSize()).toBe(100)
     })
 
     it("returns zero for an empty list", () => {
       const tree = new PositionTree([], [])
 
-      expect(tree.getTotalHeight()).toBe(0)
+      expect(tree.getTotalSize()).toBe(0)
     })
   })
 
-  describe("updateHeight", () => {
+  describe("updateSize", () => {
     it("updates the positions of subsequent items", () => {
       const tree = createTree()
 
-      tree.updateHeight("b", 15)
+      tree.updateSize("b", 15)
 
       expect(tree.getPosition("a")).toBe(0)
       expect(tree.getPosition("b")).toBe(10)
       expect(tree.getPosition("c")).toBe(45)
       expect(tree.getPosition("d")).toBe(75)
-      expect(tree.getTotalHeight()).toBe(115)
+      expect(tree.getTotalSize()).toBe(115)
     })
 
     it("does not update the positions of preceding items", () => {
       const tree = createTree()
 
-      tree.updateHeight("c", 10)
+      tree.updateSize("c", 10)
 
       expect(tree.getPosition("a")).toBe(0)
       expect(tree.getPosition("b")).toBe(10)
       expect(tree.getPosition("c")).toBe(30)
     })
 
-    it("handles decreasing an item height", () => {
+    it("handles decreasing an item size", () => {
       const tree = createTree()
 
-      tree.updateHeight("b", -5)
+      tree.updateSize("b", -5)
 
       expect(tree.getPosition("c")).toBe(25)
       expect(tree.getPosition("d")).toBe(55)
-      expect(tree.getTotalHeight()).toBe(95)
+      expect(tree.getTotalSize()).toBe(95)
     })
 
-    it("does nothing when the height difference is zero", () => {
+    it("does nothing when the size difference is zero", () => {
       const tree = createTree()
 
-      tree.updateHeight("b", 0)
+      tree.updateSize("b", 0)
 
       expect(tree.getPosition("c")).toBe(30)
-      expect(tree.getTotalHeight()).toBe(100)
+      expect(tree.getTotalSize()).toBe(100)
     })
 
     it("throws for an unknown item", () => {
       const tree = createTree()
 
-      expect(() => tree.updateHeight("unknown", 10)).toThrow(
+      expect(() => tree.updateSize("unknown", 10)).toThrow(
         "Unknown itemId: unknown",
       )
     })
   })
 
   describe("construction", () => {
-    it("throws when itemIds and heights have different lengths", () => {
+    it("throws when itemIds and sizes have different lengths", () => {
       expect(() => new PositionTree(["a", "b"], [10])).toThrow(
-        "itemIds and heights must have the same length",
+        "itemIds and sizes must have the same length",
       )
     })
 

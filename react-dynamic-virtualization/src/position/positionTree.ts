@@ -1,12 +1,12 @@
 export class PositionTree {
   private readonly itemIds: string[]
   private readonly itemIndexById: Map<string, number>
-  private readonly cumulativeHeights: number[]
-  private totalHeight: number
+  private readonly cumulativeSizes: number[]
+  private totalSize: number
 
-  constructor(itemIds: string[], heights: number[]) {
-    if (itemIds.length !== heights.length) {
-      throw new Error("itemIds and heights must have the same length")
+  constructor(itemIds: string[], sizes: number[]) {
+    if (itemIds.length !== sizes.length) {
+      throw new Error("itemIds and sizes must have the same length")
     }
 
     this.itemIds = [...itemIds]
@@ -19,22 +19,22 @@ export class PositionTree {
       throw new Error("itemIds must be unique")
     }
 
-    this.cumulativeHeights = new Array(this.itemIds.length + 1).fill(0)
+    this.cumulativeSizes = new Array(this.itemIds.length + 1).fill(0)
 
-    this.totalHeight = 0
+    this.totalSize = 0
 
     for (let i = 0; i < this.itemIds.length; i++) {
-      const height = heights[i]
+      const size = sizes[i]
 
-      this.cumulativeHeights[i + 1] = height
-      this.totalHeight += height
+      this.cumulativeSizes[i + 1] = size
+      this.totalSize += size
     }
 
-    for (let i = 1; i < this.cumulativeHeights.length; i++) {
-      const parentIndex = i + this.getCumulativeHeightStep(i)
+    for (let i = 1; i < this.cumulativeSizes.length; i++) {
+      const parentIndex = i + this.getCumulativeSizeStep(i)
 
-      if (parentIndex < this.cumulativeHeights.length) {
-        this.cumulativeHeights[parentIndex] += this.cumulativeHeights[i]
+      if (parentIndex < this.cumulativeSizes.length) {
+        this.cumulativeSizes[parentIndex] += this.cumulativeSizes[i]
       }
     }
   }
@@ -46,87 +46,87 @@ export class PositionTree {
       throw new Error(`Unknown itemId: ${itemId}`)
     }
 
-    return this.getHeightBeforeIndex(itemIndex)
+    return this.getSizeBeforeIndex(itemIndex)
   }
 
   getIndexAtPosition(position: number): number {
     if (
       position < 0 ||
-      position >= this.totalHeight ||
+      position >= this.totalSize ||
       this.itemIds.length === 0
     ) {
       return -1
     }
 
     let itemIndex = 0
-    let heightBeforeItem = 0
-    let cumulativeHeightIndex = this.getLargestPowerOfTwo(this.itemIds.length)
+    let sizeBeforeItem = 0
+    let cumulativeSizeIndex = this.getLargestPowerOfTwo(this.itemIds.length)
 
-    while (cumulativeHeightIndex > 0) {
-      const candidateItemIndex = itemIndex + cumulativeHeightIndex
+    while (cumulativeSizeIndex > 0) {
+      const candidateItemIndex = itemIndex + cumulativeSizeIndex
 
       if (
         candidateItemIndex <= this.itemIds.length &&
-        heightBeforeItem + this.cumulativeHeights[candidateItemIndex] <=
+        sizeBeforeItem + this.cumulativeSizes[candidateItemIndex] <=
           position
       ) {
         itemIndex = candidateItemIndex
-        heightBeforeItem += this.cumulativeHeights[candidateItemIndex]
+        sizeBeforeItem += this.cumulativeSizes[candidateItemIndex]
       }
 
-      cumulativeHeightIndex = Math.floor(cumulativeHeightIndex / 2)
+      cumulativeSizeIndex = Math.floor(cumulativeSizeIndex / 2)
     }
 
     return itemIndex
   }
 
-  getTotalHeight(): number {
-    return this.totalHeight
+  getTotalSize(): number {
+    return this.totalSize
   }
 
-  updateHeight(itemId: string, heightDifference: number): void {
+  updateSize(itemId: string, sizeDifference: number): void {
     const itemIndex = this.itemIndexById.get(itemId)
 
     if (itemIndex === undefined) {
       throw new Error(`Unknown itemId: ${itemId}`)
     }
 
-    if (heightDifference === 0) {
+    if (sizeDifference === 0) {
       return
     }
 
-    this.addHeightAtIndex(itemIndex, heightDifference)
-    this.totalHeight += heightDifference
+    this.addSizeAtIndex(itemIndex, sizeDifference)
+    this.totalSize += sizeDifference
   }
 
-  private getHeightBeforeIndex(itemIndex: number): number {
-    let height = 0
-    let cumulativeHeightIndex = itemIndex
+  private getSizeBeforeIndex(itemIndex: number): number {
+    let size = 0
+    let cumulativeSizeIndex = itemIndex
 
-    while (cumulativeHeightIndex > 0) {
-      height += this.cumulativeHeights[cumulativeHeightIndex]
+    while (cumulativeSizeIndex > 0) {
+      size += this.cumulativeSizes[cumulativeSizeIndex]
 
-      cumulativeHeightIndex -= this.getCumulativeHeightStep(
-        cumulativeHeightIndex,
+      cumulativeSizeIndex -= this.getCumulativeSizeStep(
+        cumulativeSizeIndex,
       )
     }
 
-    return height
+    return size
   }
 
-  private addHeightAtIndex(itemIndex: number, heightDifference: number): void {
-    let cumulativeHeightIndex = itemIndex + 1
+  private addSizeAtIndex(itemIndex: number, sizeDifference: number): void {
+    let cumulativeSizeIndex = itemIndex + 1
 
-    while (cumulativeHeightIndex < this.cumulativeHeights.length) {
-      this.cumulativeHeights[cumulativeHeightIndex] += heightDifference
+    while (cumulativeSizeIndex < this.cumulativeSizes.length) {
+      this.cumulativeSizes[cumulativeSizeIndex] += sizeDifference
 
-      cumulativeHeightIndex += this.getCumulativeHeightStep(
-        cumulativeHeightIndex,
+      cumulativeSizeIndex += this.getCumulativeSizeStep(
+        cumulativeSizeIndex,
       )
     }
   }
 
-  private getCumulativeHeightStep(index: number): number {
+  private getCumulativeSizeStep(index: number): number {
     let step = 1
 
     while (index % (step * 2) === 0) {
