@@ -1,11 +1,12 @@
 import type { ScenarioExperimentHandle } from "../types"
-import { memo, useImperativeHandle, useMemo, useRef } from "react"
+import { useImperativeHandle, useMemo, useRef } from "react"
 import { ScenarioList } from "../../providers/ScenarioList"
 import type { ProviderListHandle } from "../../providers/types"
 import type { InitialHeightsConfig } from "../../config/types"
 import { createHeightItems } from "../../data/createHeightItems"
 import { createItems } from "../../data"
 import type { SandboxItem } from "../../data"
+import { SandboxItemBody } from "../../components/SandboxItemBody"
 import "./InitialHeightsScenario.css"
 
 type InitialHeightsScenarioProps = {
@@ -44,20 +45,11 @@ export function InitialHeightsScenario({
         config={config}
         onRenderedItemCountChange={onRenderedItemCountChange}
         getRowPresentation={(item) => ({
-          className: "initial-height-item initial-height-item-fixed",
+          className: "sandbox-item-bounded",
           height: sizing === "fixed" ? config.itemSize : items[item.index].height,
         })}
-        renderRowBody={(item) => <InitialHeightItemBody item={item} />}
+        renderRowBody={(item) => <SandboxItemBody item={item} />}
       />
     </div>
   )
 }
-
-const InitialHeightItemBody = memo(function InitialHeightItemBody({ item }: { item: SandboxItem }) {
-  return (
-      <div className="initial-height-item-content">
-        <span className="initial-height-item-index">#{item.index}</span>
-        <span className="initial-height-item-text">{item.content}</span>
-      </div>
-  )
-})

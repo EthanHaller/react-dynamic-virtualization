@@ -5,25 +5,38 @@ import { useMeasuredItems } from "../hooks/useMeasuredItems"
 import VirtualizedListItem from "./VirtualizedListItem"
 import type { RenderItemOptions } from "./VirtualizedListItem"
 
-type VirtualizedListProps<T> = {
+type ViewportDimensions =
+  | { orientation?: "vertical"; height: number | string; width?: number }
+  | { orientation: "horizontal"; width: number; height?: number | string }
+
+type VirtualizedListProps<T> = ViewportDimensions & {
   items: T[]
   getItemId: (item: T) => string
-  height: number | string
   overscan?: number
   renderItem: (item: T, options: RenderItemOptions) => React.ReactElement
   scrollElementRef?: Ref<HTMLDivElement>
 }
 
-export function VirtualizedList<T>({
-  items,
-  getItemId,
-  height,
-  overscan = 2,
-  renderItem,
-  scrollElementRef,
-}: VirtualizedListProps<T>) {
+export function VirtualizedList<T>(props: VirtualizedListProps<T>) {
+  // Measurements and scroll offsets belong to the axis they were taken on.
+  return <ListOnAxis key={props.orientation ?? "vertical"} {...props} />
+}
+
+function ListOnAxis<T>(props: VirtualizedListProps<T>) {
+  const {
+    items,
+    getItemId,
+    height,
+    width,
+    orientation,
+    overscan = 2,
+    renderItem,
+    scrollElementRef,
+  } = props
+  const scrollDimension = orientation === "horizontal" ? "width" : "height"
+  const requestedSize = orientation === "horizontal" ? width : height
   const { viewportProps, viewportSize, scrollOffset } =
-    useMeasureListViewport(height, scrollElementRef)
+    useMeasureListViewport(scrollDimension, requestedSize, scrollElementRef)
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
   const { positionStore, positionSnapshot } = usePositions(itemIds)
@@ -35,7 +48,7 @@ export function VirtualizedList<T>({
     [positionStore],
   )
 
-  const { getItemRef } = useMeasuredItems(handleMeasure)
+  const { getItemRef } = useMeasuredItems(scrollDimension, handleMeasure)
 
   const { startIndex, endIndexExclusive } = positionSnapshot.getRenderRange(
     scrollOffset,
@@ -55,25 +68,32 @@ export function VirtualizedList<T>({
         item={item}
         itemId={itemId}
         position={position}
+        scrollDimension={scrollDimension}
         getItemRef={getItemRef}
         renderItem={renderItem}
       />,
     )
   }
 
+  const totalSize = positionSnapshot.getTotalSize()
+
   return (
     <div
       {...viewportProps}
+      dir={orientation === "horizontal" ? "ltr" : undefined}
       style={{
         height,
-        overflowY: "auto",
+        width,
+        overflowY: orientation === "horizontal" ? "hidden" : "auto",
+        overflowX: orientation === "horizontal" ? "auto" : undefined,
         position: items.length > 0 ? "relative" : undefined,
       }}
     >
       {items.length > 0 && (
         <div
           style={{
-            height: positionSnapshot.getTotalSize(),
+            width: orientation === "horizontal" ? totalSize : undefined,
+            height: orientation === "horizontal" ? "100%" : totalSize,
             position: "relative",
           }}
         >
