@@ -1,0 +1,33 @@
+.sandbox-item-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-panel);
+  overflow: hidden;
+}
+
+.sandbox-item-index {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+.sandbox-item-bounded {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sandbox-item-bounded .sandbox-item-content {
+  min-height: 0;
+}
+
+.sandbox-item-bounded .sandbox-item-text {
+  min-width: 0;
+  max-height: 100%;
+  overflow: hidden;
+}

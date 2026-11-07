@@ -9,6 +9,7 @@ type VirtualizedListItemProps<T> = {
   item: T
   itemId: string
   position: number
+  scrollDimension: "height" | "width"
   getItemRef: (itemId: string) => (element: HTMLDivElement | null) => void
   renderItem: (item: T, options: RenderItemOptions) => React.ReactElement
 }
@@ -17,6 +18,7 @@ function VirtualizedListItem<T>({
   item,
   itemId,
   position,
+  scrollDimension,
   getItemRef,
   renderItem,
 }: VirtualizedListItemProps<T>) {
@@ -26,8 +28,10 @@ function VirtualizedListItem<T>({
       position: "absolute",
       top: 0,
       left: 0,
-      width: "100%",
-      transform: `translateY(${position}px)`,
+      width: scrollDimension === "height" ? "100%" : undefined,
+      transform: scrollDimension === "width"
+        ? `translateX(${position}px)`
+        : `translateY(${position}px)`,
     },
   })
 }

@@ -10,6 +10,7 @@ import {
 
 // Reads the scroll offset and viewport size used for range lookup.
 export function useMeasureListViewport(
+  scrollDimension: "height" | "width",
   requestedSize: number | string,
   scrollElementRef?: Ref<HTMLDivElement>,
 ) {
@@ -19,6 +20,9 @@ export function useMeasureListViewport(
   const pixelSize =
     typeof requestedSize === "number" ? requestedSize : undefined
   const shouldMeasureSize = pixelSize === undefined
+
+  const scrollOffsetProperty = scrollDimension === "width" ? "scrollLeft" : "scrollTop"
+  const clientSizeProperty = scrollDimension === "width" ? "clientWidth" : "clientHeight"
 
   useImperativeHandle(scrollElementRef, () => viewportRef.current!, [])
 
@@ -31,15 +35,15 @@ export function useMeasureListViewport(
     let lastObservedSize: number | undefined
 
     const measureViewportSize = () => {
-      const clientHeight = viewport.clientHeight
-      if (clientHeight === lastObservedSize) {
+      const clientSize = viewport[clientSizeProperty]
+      if (clientSize === lastObservedSize) {
         return
       }
 
-      lastObservedSize = clientHeight
-      setMeasuredSize(clientHeight)
+      lastObservedSize = clientSize
+      setMeasuredSize(clientSize)
       // A resize can clamp the scroll offset before the scroll event arrives.
-      setScrollOffset(viewport.scrollTop)
+      setScrollOffset(viewport[scrollOffsetProperty])
     }
 
     const observer = new ResizeObserver(measureViewportSize)
@@ -47,11 +51,11 @@ export function useMeasureListViewport(
     measureViewportSize()
 
     return () => observer.disconnect()
-  }, [shouldMeasureSize])
+  }, [clientSizeProperty, scrollOffsetProperty, shouldMeasureSize])
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    setScrollOffset(event.currentTarget.scrollTop)
-  }, [])
+    setScrollOffset(event.currentTarget[scrollOffsetProperty])
+  }, [scrollOffsetProperty])
 
   return {
     viewportProps: { ref: viewportRef, onScroll: handleScroll },

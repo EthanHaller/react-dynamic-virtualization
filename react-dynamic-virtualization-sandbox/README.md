@@ -32,9 +32,10 @@ Vite's default SPA fallback serves these paths in both `npm run dev` and `npm ru
 ## Customization demo
 
 Open `/customization` to try library props together on one list. The viewport
-height control offers a browser-relative height, a resizable flex parent, and a
-fixed pixel height. Scroll before resizing or
-switching modes to see the visible range adjust. This demo runs separately from
+sizing control offers browser-relative height for vertical lists and available
+panel width for horizontal lists. Both orientations also offer a resizable panel
+and a fixed pixel size. Scroll before resizing or switching
+sizing modes to see the visible range adjust. This demo runs separately from
 the provider comparison scenarios.
 
 ## Scenario configuration

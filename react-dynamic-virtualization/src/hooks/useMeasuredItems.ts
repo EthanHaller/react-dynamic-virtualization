@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef } from "react"
 
 export function useMeasuredItems(
+  scrollDimension: "height" | "width",
   onMeasure: (itemId: string, size: number) => void,
 ): {
   getItemRef: (itemId: string) => (element: HTMLDivElement | null) => void
@@ -21,7 +22,7 @@ export function useMeasuredItems(
           continue
         }
 
-        onMeasureRef.current(itemId, entry.contentRect.height)
+        onMeasureRef.current(itemId, entry.contentRect[scrollDimension])
       }
     })
 
@@ -37,7 +38,7 @@ export function useMeasuredItems(
       itemIdByElement.current.clear()
       elementByItemId.current.clear()
     }
-  }, [])
+  }, [scrollDimension])
 
   const getItemRef = useCallback((itemId: string) => {
     return (element: HTMLDivElement | null) => {

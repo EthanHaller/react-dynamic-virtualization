@@ -1,58 +1,129 @@
-import { useState } from "react"
+import { useCallback, useLayoutEffect, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
-import { createHeightItems, type HeightItem } from "../../data/createHeightItems"
+import { SandboxItemBody } from "../../components/SandboxItemBody"
+import { SelectInput } from "../../components/controls/SelectInput"
+import { createHeightItems } from "../../data/createHeightItems"
 import "./CustomizationDemo.css"
 
 export const customizationPath = "/customization"
 
-const heightOptions = [
-  { label: "Viewport (55dvh)", height: "55dvh" },
-  { label: "Resizable flex parent", height: "auto" },
-  { label: "Fixed (360px)", height: 360 },
-] as const
+type Orientation = "vertical" | "horizontal"
+type SizingMode = "responsive" | "panel" | "fixed"
 
+const orientationOptions: { label: string; value: Orientation }[] = [
+  { label: "Vertical", value: "vertical" },
+  { label: "Horizontal", value: "horizontal" },
+]
+
+const viewportHeights = { responsive: "55dvh", panel: "auto", fixed: 360 } as const
 const items = createHeightItems({ itemCount: 1000, minHeight: 50, maxHeight: 120 })
-const getItemId = (item: HeightItem) => item.id
+type DemoItem = (typeof items)[number]
+const getItemId = (item: DemoItem) => item.id
 
 export function CustomizationDemo() {
-  const [height, setHeight] = useState<string | number>(heightOptions[0].height)
+  const [orientation, setOrientation] = useState<Orientation>("vertical")
+  const [sizingMode, setSizingMode] = useState<SizingMode>("responsive")
+  const frameRef = useRef<HTMLDivElement>(null)
+  const [frameWidth, setFrameWidth] = useState(0)
+
+  useLayoutEffect(() => {
+    if (orientation !== "horizontal") {
+      return
+    }
+
+    const frame = frameRef.current!
+    const measureWidth = () => setFrameWidth(frame.clientWidth)
+    const observer = new ResizeObserver(measureWidth)
+    observer.observe(frame)
+    measureWidth()
+
+    return () => observer.disconnect()
+  }, [orientation])
+
+  // The browser writes inline dimensions when the resize handle is dragged.
+  function clearPanelSize() {
+    frameRef.current?.style.removeProperty("width")
+    frameRef.current?.style.removeProperty("height")
+  }
+
+  const scrollDimension = orientation === "horizontal" ? "width" : "height"
+  const sizingOptions: { label: string; value: SizingMode }[] = [
+    {
+      label: orientation === "horizontal" ? "Fit available width" : "Follow browser height",
+      value: "responsive",
+    },
+    { label: "Fill resizable panel", value: "panel" },
+    { label: `Fixed ${scrollDimension}`, value: "fixed" },
+  ]
+  const viewportDimensions = orientation === "horizontal"
+    ? { orientation, width: frameWidth, height: sizingMode === "panel" ? "auto" : 120 }
+    : { orientation, height: viewportHeights[sizingMode] }
+
+  const renderItem = useCallback((item: DemoItem, { ref, style }: {
+    ref: (element: HTMLDivElement | null) => void
+    style: React.CSSProperties
+  }) => (
+    <div
+      ref={ref}
+      className={orientation === "horizontal"
+        ? "sandbox-item-bounded customization-horizontal-item"
+        : "sandbox-item-bounded"}
+      style={orientation === "horizontal"
+        ? { ...style, height: "100%" }
+        : { ...style, height: item.height }}
+    >
+      <SandboxItemBody item={item} />
+    </div>
+  ), [orientation])
 
   return (
-    <section className="panel responsive-viewport-demo">
-      <h2>Customization</h2>
-      <h3>Viewport height</h3>
-      <p>Resize the browser for viewport sizing, or drag the flex panel’s resize handle. Switch modes while scrolled to compare them.</p>
-      <div role="group" aria-label="Viewport sizing">
-        {heightOptions.map((option) => (
-          <button
-            key={option.height}
-            type="button"
-            aria-pressed={height === option.height}
-            onClick={() => setHeight(option.height)}
+    <div className="experiment-layout">
+      <section className="panel experiment-panel">
+        <div className="panel-header"><h2>Experiment</h2></div>
+        <div className="customization-demo">
+          <div
+            ref={frameRef}
+            className="customization-viewport"
+            data-sizing={sizingMode}
+            data-orientation={orientation}
           >
-            {option.label}
-          </button>
-        ))}
-      </div>
-      <div className="responsive-viewport-frame" data-flex={height === "auto"}>
-        <VirtualizedList
-          items={items}
-          getItemId={getItemId}
-          height={height}
-          renderItem={renderItem}
-        />
-      </div>
-    </section>
-  )
-}
-
-function renderItem(item: HeightItem, { ref, style }: {
-  ref: (element: HTMLDivElement | null) => void
-  style: React.CSSProperties
-}) {
-  return (
-    <div ref={ref} className="responsive-viewport-row" style={{ ...style, height: item.height }}>
-      Row {item.index + 1} · {item.height}px
+            <VirtualizedList
+              {...viewportDimensions}
+              items={items}
+              getItemId={getItemId}
+              renderItem={renderItem}
+            />
+          </div>
+        </div>
+      </section>
+      <aside className="panel configuration-panel">
+        <div className="panel-header"><h2>Configuration</h2></div>
+        <div className="configuration-content">
+          <SelectInput
+            id="customization-orientation"
+            label="Orientation"
+            value={orientation}
+            options={orientationOptions}
+            onChange={(value) => {
+              clearPanelSize()
+              setOrientation(value)
+            }}
+          />
+          <SelectInput
+            id="customization-viewport-sizing"
+            label={orientation === "horizontal" ? "Viewport width" : "Viewport height"}
+            value={sizingMode}
+            options={sizingOptions}
+            onChange={(value) => {
+              clearPanelSize()
+              setSizingMode(value)
+            }}
+          />
+          {sizingMode === "panel" && (
+            <p className="control-description">Drag the panel’s corner to resize it.</p>
+          )}
+        </div>
+      </aside>
     </div>
   )
 }
