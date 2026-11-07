@@ -49,7 +49,7 @@ function renderList(items: Item[]) {
   )
 }
 
-describe("VirtualizedList integration", () => {
+describe("VirtualizedList item measurement", () => {
   beforeEach(() => {
     MockResizeObserver.reset()
   })

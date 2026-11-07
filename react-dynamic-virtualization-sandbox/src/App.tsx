@@ -16,6 +16,7 @@ import { PayloadUpdateRunControls, PayloadUpdateRunDiagnostics } from "./scenari
 import { ChangingSizesScenario } from "./scenarios/changingSizes/ChangingSizesScenario"
 import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
 import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario"
+import { CustomizationDemo, customizationPath } from "./scenarios/customization/CustomizationDemo"
 
 function App() {
   const { pathname, search, hash } = useLocation()
@@ -47,6 +48,12 @@ function App() {
               {scenario.label}
             </NavLink>
           ))}
+          <NavLink
+            to={customizationPath}
+            className={({ isActive }) => `scenario-tab${isActive ? " active" : ""}`}
+          >
+            Customization
+          </NavLink>
         </nav>
 
         <Routes>
@@ -64,6 +71,7 @@ function App() {
               }
             />
           ))}
+          <Route path={customizationPath} element={<CustomizationDemo />} />
           <Route path="*" element={
             <section className="panel not-found">
               <h2>Scenario not found</h2>

@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, type Ref } from "react"
+import { useMeasureListViewport } from "../hooks/useMeasureListViewport"
 import { usePositions } from "../hooks/usePositions"
 import { useMeasuredItems } from "../hooks/useMeasuredItems"
 import VirtualizedListItem from "./VirtualizedListItem"
@@ -7,10 +8,10 @@ import type { RenderItemOptions } from "./VirtualizedListItem"
 type VirtualizedListProps<T> = {
   items: T[]
   getItemId: (item: T) => string
-  height: number
+  height: number | string
   overscan?: number
   renderItem: (item: T, options: RenderItemOptions) => React.ReactElement
-  scrollElementRef?: React.Ref<HTMLDivElement>
+  scrollElementRef?: Ref<HTMLDivElement>
 }
 
 export function VirtualizedList<T>({
@@ -21,7 +22,8 @@ export function VirtualizedList<T>({
   renderItem,
   scrollElementRef,
 }: VirtualizedListProps<T>) {
-  const [scrollTop, setScrollTop] = useState(0)
+  const { viewportProps, viewportHeight, scrollTop } =
+    useMeasureListViewport(height, scrollElementRef)
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
   const { positionStore, positionSnapshot } = usePositions(itemIds)
@@ -35,40 +37,14 @@ export function VirtualizedList<T>({
 
   const { getItemRef } = useMeasuredItems(handleMeasure)
 
-  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(event.currentTarget.scrollTop)
-  }, [])
-
-  if (items.length === 0) {
-    return (
-      <div
-        ref={scrollElementRef}
-        style={{
-          height,
-          overflowY: "auto",
-        }}
-        onScroll={handleScroll}
-      />
-    )
-  }
-
-  const firstVisibleIndex = positionSnapshot.getIndexAtPosition(scrollTop)
-  const lastVisibleIndex = positionSnapshot.getIndexAtPosition(
-    scrollTop + height - 1,
+  const { startIndex, endIndexExclusive } = positionSnapshot.getRenderRange(
+    scrollTop,
+    viewportHeight,
+    overscan,
   )
-
-  const firstIndex = Math.max(
-    0,
-    (firstVisibleIndex === -1 ? 0 : firstVisibleIndex) - overscan,
-  )
-  const lastIndex = Math.min(
-    items.length - 1,
-    (lastVisibleIndex === -1 ? items.length - 1 : lastVisibleIndex) + overscan,
-  )
-
   const renderedItems = []
 
-  for (let index = firstIndex; index <= lastIndex; index++) {
+  for (let index = startIndex; index < endIndexExclusive; index++) {
     const item = items[index]
     const itemId = itemIds[index]
     const position = positionSnapshot.getPosition(itemId)
@@ -87,22 +63,23 @@ export function VirtualizedList<T>({
 
   return (
     <div
-      ref={scrollElementRef}
+      {...viewportProps}
       style={{
         height,
         overflowY: "auto",
-        position: "relative",
+        position: items.length > 0 ? "relative" : undefined,
       }}
-      onScroll={handleScroll}
     >
-      <div
-        style={{
-          height: positionSnapshot.getTotalHeight(),
-          position: "relative",
-        }}
-      >
-        {renderedItems}
-      </div>
+      {items.length > 0 && (
+        <div
+          style={{
+            height: positionSnapshot.getTotalHeight(),
+            position: "relative",
+          }}
+        >
+          {renderedItems}
+        </div>
+      )}
     </div>
   )
 }
