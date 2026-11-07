@@ -22,15 +22,15 @@ export function VirtualizedList<T>({
   renderItem,
   scrollElementRef,
 }: VirtualizedListProps<T>) {
-  const { viewportProps, viewportHeight, scrollTop } =
+  const { viewportProps, viewportSize, scrollOffset } =
     useMeasureListViewport(height, scrollElementRef)
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
   const { positionStore, positionSnapshot } = usePositions(itemIds)
 
   const handleMeasure = useCallback(
-    (itemId: string, newHeight: number) => {
-      positionStore.updateHeight(itemId, newHeight)
+    (itemId: string, size: number) => {
+      positionStore.updateSize(itemId, size)
     },
     [positionStore],
   )
@@ -38,8 +38,8 @@ export function VirtualizedList<T>({
   const { getItemRef } = useMeasuredItems(handleMeasure)
 
   const { startIndex, endIndexExclusive } = positionSnapshot.getRenderRange(
-    scrollTop,
-    viewportHeight,
+    scrollOffset,
+    viewportSize,
     overscan,
   )
   const renderedItems = []
@@ -73,7 +73,7 @@ export function VirtualizedList<T>({
       {items.length > 0 && (
         <div
           style={{
-            height: positionSnapshot.getTotalHeight(),
+            height: positionSnapshot.getTotalSize(),
             position: "relative",
           }}
         >

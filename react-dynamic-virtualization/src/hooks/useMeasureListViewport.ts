@@ -8,54 +8,54 @@ import {
   type UIEvent,
 } from "react"
 
-// Reads the scroll offset and viewport height used for range lookup.
+// Reads the scroll offset and viewport size used for range lookup.
 export function useMeasureListViewport(
-  requestedHeight: number | string,
+  requestedSize: number | string,
   scrollElementRef?: Ref<HTMLDivElement>,
 ) {
-  const [scrollTop, setScrollTop] = useState(0)
-  const [measuredHeight, setMeasuredHeight] = useState(0)
+  const [scrollOffset, setScrollOffset] = useState(0)
+  const [measuredSize, setMeasuredSize] = useState(0)
   const viewportRef = useRef<HTMLDivElement>(null)
-  const pixelHeight =
-    typeof requestedHeight === "number" ? requestedHeight : undefined
-  const shouldMeasureHeight = pixelHeight === undefined
+  const pixelSize =
+    typeof requestedSize === "number" ? requestedSize : undefined
+  const shouldMeasureSize = pixelSize === undefined
 
   useImperativeHandle(scrollElementRef, () => viewportRef.current!, [])
 
   useLayoutEffect(() => {
-    if (!shouldMeasureHeight) {
+    if (!shouldMeasureSize) {
       return
     }
 
     const viewport = viewportRef.current!
-    let lastObservedHeight: number | undefined
+    let lastObservedSize: number | undefined
 
-    const measureViewportHeight = () => {
+    const measureViewportSize = () => {
       const clientHeight = viewport.clientHeight
-      if (clientHeight === lastObservedHeight) {
+      if (clientHeight === lastObservedSize) {
         return
       }
 
-      lastObservedHeight = clientHeight
-      setMeasuredHeight(clientHeight)
+      lastObservedSize = clientHeight
+      setMeasuredSize(clientHeight)
       // A resize can clamp the scroll offset before the scroll event arrives.
-      setScrollTop(viewport.scrollTop)
+      setScrollOffset(viewport.scrollTop)
     }
 
-    const observer = new ResizeObserver(measureViewportHeight)
+    const observer = new ResizeObserver(measureViewportSize)
     observer.observe(viewport)
-    measureViewportHeight()
+    measureViewportSize()
 
     return () => observer.disconnect()
-  }, [shouldMeasureHeight])
+  }, [shouldMeasureSize])
 
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    setScrollTop(event.currentTarget.scrollTop)
+    setScrollOffset(event.currentTarget.scrollTop)
   }, [])
 
   return {
     viewportProps: { ref: viewportRef, onScroll: handleScroll },
-    viewportHeight: pixelHeight ?? measuredHeight,
-    scrollTop,
+    viewportSize: pixelSize ?? measuredSize,
+    scrollOffset,
   }
 }

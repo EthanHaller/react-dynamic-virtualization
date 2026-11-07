@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useRef } from "react"
 
 export function useMeasuredItems(
-  onMeasure: (itemId: string, height: number) => void,
+  onMeasure: (itemId: string, size: number) => void,
 ): {
   getItemRef: (itemId: string) => (element: HTMLDivElement | null) => void
 } {
