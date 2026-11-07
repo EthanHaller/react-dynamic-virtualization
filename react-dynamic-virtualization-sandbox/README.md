@@ -29,6 +29,14 @@ Open `/fixed`, `/variable`, `/changing`, `/mutations`, or `/drag-and-drop` direc
 
 Vite's default SPA fallback serves these paths in both `npm run dev` and `npm run preview` (after `npm run build`). A deployed static host must likewise serve `index.html` for scenario paths.
 
+## Customization demo
+
+Open `/customization` to try library props together on one list. The viewport
+height control offers a browser-relative height, a resizable flex parent, and a
+fixed pixel height. Scroll before resizing or
+switching modes to see the visible range adjust. This demo runs separately from
+the provider comparison scenarios.
+
 ## Scenario configuration
 
 The preset selector reflects matching configuration, or Custom for other values.

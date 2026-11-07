@@ -5,6 +5,11 @@ const DEFAULT_ITEM_HEIGHT = 50
 export type PositionSnapshot = {
   getPosition: (itemId: string) => number
   getIndexAtPosition: (position: number) => number
+  getRenderRange: (
+    scrollTop: number,
+    viewportHeight: number,
+    overscan: number,
+  ) => { startIndex: number; endIndexExclusive: number }
   getTotalHeight: () => number
 }
 
@@ -73,6 +78,29 @@ export class PositionStore {
 
       getIndexAtPosition: (position: number) =>
         this.positionTree.getIndexAtPosition(position),
+
+      getRenderRange: (scrollTop, viewportHeight, overscan) => {
+        const itemCount = this.itemHeights.size
+        if (itemCount === 0 || viewportHeight <= 0) {
+          return { startIndex: 0, endIndexExclusive: 0 }
+        }
+
+        const firstVisibleIndex = this.positionTree.getIndexAtPosition(scrollTop)
+        const lastVisibleIndex = this.positionTree.getIndexAtPosition(
+          scrollTop + viewportHeight - 1,
+        )
+
+        return {
+          startIndex: Math.max(
+            0,
+            (firstVisibleIndex === -1 ? 0 : firstVisibleIndex) - overscan,
+          ),
+          endIndexExclusive: Math.min(
+            itemCount,
+            (lastVisibleIndex === -1 ? itemCount : lastVisibleIndex + 1) + overscan,
+          ),
+        }
+      },
 
       getTotalHeight: () => this.positionTree.getTotalHeight(),
     }
