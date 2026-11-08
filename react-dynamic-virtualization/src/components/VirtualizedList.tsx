@@ -3,7 +3,7 @@ import { useMeasureListViewport } from "../hooks/useMeasureListViewport"
 import { usePositions } from "../hooks/usePositions"
 import { useMeasuredItems } from "../hooks/useMeasuredItems"
 import VirtualizedListItem from "./VirtualizedListItem"
-import type { RenderItemOptions } from "./VirtualizedListItem"
+import type { RenderItemOptions } from "./VirtualizedListItem.js"
 
 type ViewportDimensions =
   | { orientation?: "vertical"; height: number | string; width?: number }

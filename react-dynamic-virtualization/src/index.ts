@@ -1,1 +1,1 @@
-export {VirtualizedList} from "./components/VirtualizedList";
+export { VirtualizedList } from "./components/VirtualizedList.js"
