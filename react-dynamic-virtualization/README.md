@@ -8,6 +8,8 @@ Render large React lists whose items can change size after they mount.
 npm install react-dynamic-virtualization
 ```
 
+The library uses your app’s React installation. React 18 and 19 are supported.
+
 ## Usage
 
 ```tsx
