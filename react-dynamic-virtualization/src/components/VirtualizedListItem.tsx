@@ -1,7 +1,7 @@
 import { memo } from "react"
 
 export type RenderItemOptions = {
-  ref: (element: HTMLDivElement | null) => void
+  ref: (element: HTMLElement | null) => void
   style: React.CSSProperties
 }
 
@@ -10,7 +10,7 @@ type VirtualizedListItemProps<T> = {
   itemId: string
   position: number
   scrollDimension: "height" | "width"
-  getItemRef: (itemId: string) => (element: HTMLDivElement | null) => void
+  getItemRef: (itemId: string) => (element: HTMLElement | null) => void
   renderItem: (item: T, options: RenderItemOptions) => React.ReactElement
 }
 

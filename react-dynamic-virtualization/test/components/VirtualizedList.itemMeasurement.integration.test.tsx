@@ -106,6 +106,26 @@ describe("VirtualizedList item measurement", () => {
     })
   })
 
+  it("measures article elements and positions following items", () => {
+    const items = ["First", "Second"]
+    render(
+      <VirtualizedList
+        items={items}
+        getItemId={(item) => item}
+        height={500}
+        renderItem={(item, { ref, style }) => (
+          <article ref={ref} style={style}>{item}</article>
+        )}
+      />,
+    )
+    const [first, second] = screen.getAllByRole("article")
+
+    expect(MockResizeObserver.instances[0].observe).toHaveBeenCalledWith(first)
+    triggerResize(first, 80)
+
+    expect(second).toHaveStyle({ transform: "translateY(80px)" })
+  })
+
   it("applies multiple initial height measurements", () => {
     const items: Item[] = [
       { id: "item-1", name: "Item 1" },

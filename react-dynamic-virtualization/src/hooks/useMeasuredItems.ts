@@ -4,10 +4,10 @@ export function useMeasuredItems(
   scrollDimension: "height" | "width",
   onMeasure: (itemId: string, size: number) => void,
 ): {
-  getItemRef: (itemId: string) => (element: HTMLDivElement | null) => void
+  getItemRef: (itemId: string) => (element: HTMLElement | null) => void
 } {
-  const itemIdByElement = useRef(new Map<HTMLDivElement, string>())
-  const elementByItemId = useRef(new Map<string, HTMLDivElement>())
+  const itemIdByElement = useRef(new Map<Element, string>())
+  const elementByItemId = useRef(new Map<string, HTMLElement>())
   const observerRef = useRef<ResizeObserver | null>(null)
   const onMeasureRef = useRef(onMeasure)
   onMeasureRef.current = onMeasure
@@ -15,8 +15,7 @@ export function useMeasuredItems(
   useLayoutEffect(() => {
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const element = entry.target as HTMLDivElement
-        const itemId = itemIdByElement.current.get(element)
+        const itemId = itemIdByElement.current.get(entry.target)
 
         if (itemId === undefined) {
           continue
@@ -41,7 +40,7 @@ export function useMeasuredItems(
   }, [scrollDimension])
 
   const getItemRef = useCallback((itemId: string) => {
-    return (element: HTMLDivElement | null) => {
+    return (element: HTMLElement | null) => {
       const previousElement = elementByItemId.current.get(itemId)
 
       if (previousElement !== undefined) {
