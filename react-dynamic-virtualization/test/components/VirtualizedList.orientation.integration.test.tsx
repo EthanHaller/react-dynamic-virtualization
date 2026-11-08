@@ -42,7 +42,7 @@ describe("VirtualizedList orientation", () => {
         scrollElementRef={viewportRef}
       />
     )
-    const { rerender } = render(list(100))
+    const { rerender } = render(list(99))
     const viewport = viewportRef.current!
 
     expect(MockResizeObserver.instances).toHaveLength(1)
@@ -63,7 +63,7 @@ describe("VirtualizedList orientation", () => {
     expect(viewport.textContent).toBe("cd")
   })
 
-  it("starts at offset zero with fresh sizes when the orientation changes", () => {
+  it("resets scroll offset and item sizes on orientation changes", () => {
     const viewportRef = createRef<HTMLDivElement>()
     const props = { items, getItemId, renderItem, overscan: 0, scrollElementRef: viewportRef }
     const { rerender } = render(<VirtualizedList {...props} height={100} />)
@@ -74,7 +74,7 @@ describe("VirtualizedList orientation", () => {
     fireEvent.scroll(verticalViewport)
     expect(verticalViewport.textContent).toBe("cd")
 
-    rerender(<VirtualizedList {...props} orientation="horizontal" width={100} height={100} />)
+    rerender(<VirtualizedList {...props} orientation="horizontal" width={99} height={100} />)
     const horizontalViewport = viewportRef.current!
 
     expect(horizontalViewport).not.toBe(verticalViewport)

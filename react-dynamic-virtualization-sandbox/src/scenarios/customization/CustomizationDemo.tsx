@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
 import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
 import { SandboxItemBody } from "../../components/SandboxItemBody"
+import { NumberInput } from "../../components/controls/NumberInput"
 import { SelectInput } from "../../components/controls/SelectInput"
 import { createHeightItems } from "../../data/createHeightItems"
 import "./CustomizationDemo.css"
@@ -15,6 +16,17 @@ const orientationOptions: { label: string; value: Orientation }[] = [
   { label: "Horizontal", value: "horizontal" },
 ]
 
+const spacingControls = [
+  { prop: "gap", label: "Item gap" },
+  { prop: "paddingStart", label: "Start padding" },
+  { prop: "paddingEnd", label: "End padding" },
+] as const
+
+const viewportStyles = [
+  { label: "Default", value: "default" },
+  { label: "Outline", value: "outline" },
+] as const
+
 const viewportHeights = { responsive: "55dvh", panel: "auto", fixed: 360 } as const
 const items = createHeightItems({ itemCount: 1000, minHeight: 50, maxHeight: 120 })
 type DemoItem = (typeof items)[number]
@@ -23,6 +35,8 @@ const getItemId = (item: DemoItem) => item.id
 export function CustomizationDemo() {
   const [orientation, setOrientation] = useState<Orientation>("vertical")
   const [sizingMode, setSizingMode] = useState<SizingMode>("responsive")
+  const [spacing, setSpacing] = useState({ gap: 0, paddingStart: 0, paddingEnd: 0 })
+  const [viewportStyle, setViewportStyle] = useState<"default" | "outline">("default")
   const frameRef = useRef<HTMLDivElement>(null)
   const [frameWidth, setFrameWidth] = useState(0)
 
@@ -89,6 +103,8 @@ export function CustomizationDemo() {
           >
             <VirtualizedList
               {...viewportDimensions}
+              {...spacing}
+              className={viewportStyle === "outline" ? "customization-viewport-outline" : undefined}
               items={items}
               getItemId={getItemId}
               renderItem={renderItem}
@@ -122,6 +138,23 @@ export function CustomizationDemo() {
           {sizingMode === "panel" && (
             <p className="control-description">Drag the panel’s corner to resize it.</p>
           )}
+          {spacingControls.map(({ prop, label }) => (
+            <NumberInput
+              key={prop}
+              id={`customization-${prop}`}
+              label={label}
+              min={0}
+              value={spacing[prop]}
+              onChange={(value) => setSpacing({ ...spacing, [prop]: Math.max(0, value) })}
+            />
+          ))}
+          <SelectInput
+            id="customization-viewport-style"
+            label="Viewport style"
+            value={viewportStyle}
+            options={[...viewportStyles]}
+            onChange={setViewportStyle}
+          />
         </div>
       </aside>
     </div>

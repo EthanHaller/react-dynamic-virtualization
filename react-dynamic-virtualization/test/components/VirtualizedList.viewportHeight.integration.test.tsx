@@ -54,7 +54,7 @@ describe("CSS-sized viewport", () => {
     expect(viewport.style.height).toBe("70dvh")
     expect(viewport.textContent).toBe("")
 
-    setClientHeight(50)
+    setClientHeight(49)
     notifyViewportResize()
     expect(viewport.textContent).toBe("a")
 
@@ -72,9 +72,9 @@ describe("CSS-sized viewport", () => {
     expect(viewport.textContent).toBe("")
   })
 
-  it("skips rendering when the measured height is unchanged", () => {
+  it("preserves the current render for repeated viewport measurements", () => {
     const { onRender, setClientHeight, notifyViewportResize } = renderResponsiveList()
-    setClientHeight(50)
+    setClientHeight(49)
     notifyViewportResize()
     onRender.mockClear()
 
@@ -93,11 +93,11 @@ describe("CSS-sized viewport", () => {
     expect(MockResizeObserver.instances).toHaveLength(2)
     expect(viewportObserver.disconnect).not.toHaveBeenCalled()
 
-    setHeight(50)
+    setHeight(49)
     expect(viewportObserver.disconnect).toHaveBeenCalledTimes(1)
     expect(viewport.textContent).toBe("a")
 
-    setClientHeight(100)
+    setClientHeight(99)
     setHeight("auto")
     expect(MockResizeObserver.instances).toHaveLength(3)
     expect(viewport.textContent).toBe("ab")

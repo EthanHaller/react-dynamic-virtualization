@@ -31,3 +31,7 @@
   min-width: 7rem;
   max-width: 26rem;
 }
+
+.customization-viewport-outline {
+  outline: 2px solid var(--color-accent);
+}
