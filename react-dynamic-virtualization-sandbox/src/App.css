@@ -6,8 +6,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 3.5rem;
-  padding: 0 var(--space-6);
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  min-height: 3.5rem;
+  padding: var(--space-2) var(--space-6);
   background: var(--color-panel);
   border-bottom: 1px solid var(--color-border);
 }
@@ -16,6 +18,54 @@
   margin: 0;
   font-size: var(--font-size-md);
   font-weight: 600;
+}
+
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.library-build-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.library-build-switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.library-build-switch-track {
+  display: flex;
+  align-items: center;
+  width: 2rem;
+  height: 1.125rem;
+  padding: 0.125rem;
+  border-radius: 1rem;
+  background: var(--color-text-secondary);
+}
+
+.library-build-switch-track::before {
+  content: "";
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--color-panel);
+}
+
+.library-build-switch input:checked + .library-build-switch-track {
+  justify-content: flex-end;
+  background: var(--color-accent);
+}
+
+.library-build-switch input:focus-visible + .library-build-switch-track {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .app-header a {

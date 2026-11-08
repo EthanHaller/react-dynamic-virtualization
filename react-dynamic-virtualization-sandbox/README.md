@@ -2,6 +2,14 @@
 
 Run `npm install`, then `npm run dev` using a Node version supported by Vite 8 (Node 22.12+). Run `npm run build` and `npm run lint` to verify changes.
 
+## Library build selector
+
+The **Use local build** switch is off by default, so the sandbox uses the npm package
+pinned in its manifest. Turn it on to use the local library source.
+It applies to the React Dynamic Virtualization provider and the Customization
+tab. Switching builds remounts the list and resets its scroll position. The
+selection stays active as you navigate between tabs and resets on reload.
+
 ## Dependency direction
 
 The sandbox may import from the library. The library must have no knowledge of
