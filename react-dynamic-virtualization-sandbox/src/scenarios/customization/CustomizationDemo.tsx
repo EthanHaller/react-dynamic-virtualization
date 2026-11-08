@@ -27,16 +27,33 @@ const viewportStyles = [
   { label: "Outline", value: "outline" },
 ] as const
 
+const estimateOptions = [
+  { label: "Default estimate", value: "default" },
+  { label: "Estimate from item data", value: "item-data" },
+] as const
+
 const viewportHeights = { responsive: "55dvh", panel: "auto", fixed: 360 } as const
 const items = createHeightItems({ itemCount: 1000, minHeight: 50, maxHeight: 120 })
 type DemoItem = (typeof items)[number]
 const getItemId = (item: DemoItem) => item.id
+
+const ESTIMATED_CHARACTER_WIDTH = 7
+const MIN_ESTIMATED_ITEM_WIDTH = 112
+const MAX_ESTIMATED_ITEM_WIDTH = 416
+
+function estimateItemWidth(item: DemoItem) {
+  const textWidth = item.content.length * ESTIMATED_CHARACTER_WIDTH
+  return Math.min(MAX_ESTIMATED_ITEM_WIDTH, Math.max(MIN_ESTIMATED_ITEM_WIDTH, textWidth))
+}
+
+const estimateItemHeight = (item: DemoItem) => item.height
 
 export function CustomizationDemo() {
   const [orientation, setOrientation] = useState<Orientation>("vertical")
   const [sizingMode, setSizingMode] = useState<SizingMode>("responsive")
   const [spacing, setSpacing] = useState({ gap: 0, paddingStart: 0, paddingEnd: 0 })
   const [viewportStyle, setViewportStyle] = useState<"default" | "outline">("default")
+  const [estimateMode, setEstimateMode] = useState<"default" | "item-data">("default")
   const frameRef = useRef<HTMLDivElement>(null)
   const [frameWidth, setFrameWidth] = useState(0)
 
@@ -73,6 +90,8 @@ export function CustomizationDemo() {
     ? { orientation, width: frameWidth, height: sizingMode === "panel" ? "auto" : 120 }
     : { orientation, height: viewportHeights[sizingMode] }
 
+  const estimateSizeFromItem = orientation === "horizontal" ? estimateItemWidth : estimateItemHeight
+
   const renderItem = useCallback((item: DemoItem, { ref, style }: {
     ref: (element: HTMLDivElement | null) => void
     style: React.CSSProperties
@@ -102,6 +121,8 @@ export function CustomizationDemo() {
             data-orientation={orientation}
           >
             <VirtualizedList
+              key={estimateMode}
+              estimateItemSize={estimateMode === "item-data" ? estimateSizeFromItem : undefined}
               {...viewportDimensions}
               {...spacing}
               className={viewportStyle === "outline" ? "customization-viewport-outline" : undefined}
@@ -155,6 +176,14 @@ export function CustomizationDemo() {
             options={[...viewportStyles]}
             onChange={setViewportStyle}
           />
+          <SelectInput
+            id="customization-item-estimate"
+            label="Item size estimate"
+            value={estimateMode}
+            options={[...estimateOptions]}
+            onChange={setEstimateMode}
+          />
+          <p className="control-description">Changing the estimate restarts the demo list.</p>
         </div>
       </aside>
     </div>

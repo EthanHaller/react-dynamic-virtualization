@@ -40,6 +40,18 @@ has no trailing gap. Changing `gap` rebuilds item offsets from cached
 measurements, so set it as a layout value. Pass `className` to style the outer
 scroll container.
 
+## Item size estimates
+
+Pass `estimateItemSize={(item) => item.kind === "photo" ? 240 : 64}` to give
+each item a starting size in pixels. The estimate is a height for vertical
+lists and a width for horizontal lists. Return a finite, positive number.
+Without a callback, items start at 50 px.
+
+The list uses the callback when an item ID enters the list. Retained IDs keep
+their current sizes when the callback changes. Measured sizes take over as
+items mount and continue to update as they resize. Keep the callback pure so
+React can safely repeat render work.
+
 ## Development
 
 ```bash

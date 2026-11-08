@@ -9,6 +9,11 @@ type ListPadding = {
 
 const NO_PADDING: ListPadding = { paddingStart: 0, paddingEnd: 0 }
 
+export type PositionStoreOptions = {
+  gap?: number
+  estimateItemSizeAtIndex?: (index: number) => number
+}
+
 export type PositionSnapshot = {
   getPosition: (itemId: string, padding?: ListPadding) => number
   getIndexAtPosition: (position: number) => number
@@ -30,13 +35,30 @@ export class PositionStore {
 
   private snapshot: PositionSnapshot
 
-  constructor(itemIds: string[], previousSizes?: Map<string, number>, gap = 0) {
+  constructor(
+    itemIds: string[],
+    previousSizes?: Map<string, number>,
+    { gap = 0, estimateItemSizeAtIndex }: PositionStoreOptions = {},
+  ) {
     this.gap = gap
     this.itemSizes = new Map(
-      itemIds.map((itemId) => [
-        itemId,
-        previousSizes?.get(itemId) ?? DEFAULT_ITEM_SIZE,
-      ]),
+      itemIds.map((itemId, index) => {
+        const previousSize = previousSizes?.get(itemId)
+        if (previousSize !== undefined) {
+          return [itemId, previousSize]
+        }
+
+        if (estimateItemSizeAtIndex === undefined) {
+          return [itemId, DEFAULT_ITEM_SIZE]
+        }
+
+        const estimate = estimateItemSizeAtIndex(index)
+        if (!Number.isFinite(estimate) || estimate <= 0) {
+          throw new Error(`estimateItemSize must return a finite, positive number for item "${itemId}"`)
+        }
+
+        return [itemId, estimate]
+      }),
     )
 
     this.positionTree = new PositionTree(
