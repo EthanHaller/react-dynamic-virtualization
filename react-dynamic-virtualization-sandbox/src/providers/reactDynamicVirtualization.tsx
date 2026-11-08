@@ -1,5 +1,5 @@
 import { useCallback, useImperativeHandle, useRef } from "react"
-import { VirtualizedList } from "../../../react-dynamic-virtualization/src"
+import { SandboxVirtualizedList } from "./SandboxVirtualizedList"
 import type { ProviderListProps } from "./types"
 import type { SandboxItem } from "../data"
 import { useRenderedItemTracking } from "./useRenderedItemTracking"
@@ -30,7 +30,7 @@ export function ReactDynamicVirtualizationList({ ref, config, items, renderRowBo
     />
   ), [getRowPresentation, renderRowBody, trackRenderedItem])
 
-  return <VirtualizedList
+  return <SandboxVirtualizedList
     items={items}
     getItemId={getItemId}
     height={config.listHeight}

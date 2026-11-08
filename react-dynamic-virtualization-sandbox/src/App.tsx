@@ -18,7 +18,10 @@ import { MutationsScenario } from "./scenarios/mutations/MutationsScenario"
 import { DragAndDropScenario } from "./scenarios/dragAndDrop/DragAndDropScenario"
 import { CustomizationDemo, customizationPath } from "./scenarios/customization/CustomizationDemo"
 
+import { LibraryBuildContext, type LibraryBuild } from "./providers/libraryBuilds"
+
 function App() {
+  const [libraryBuild, setLibraryBuild] = useState<LibraryBuild>("published")
   const { pathname, search, hash } = useLocation()
   const activeScenario = scenarios.find((scenario) => scenario.path === pathname)?.id ?? "fixed-heights"
   const sandboxConfiguration = useSandboxConfig(activeScenario)
@@ -27,13 +30,25 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>React Dynamic Virtualization</h1>
-        <a
-          href="https://github.com/EthanHaller/react-dynamic-virtualization"
-          target="_blank"
-          rel="noreferrer"
-        >
-          GitHub ↗
-        </a>
+        <div className="app-header-actions">
+          <label className="library-build-switch">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={libraryBuild === "local"}
+              onChange={(event) => setLibraryBuild(event.target.checked ? "local" : "published")}
+            />
+            <span className="library-build-switch-track" aria-hidden="true" />
+            Use local build
+          </label>
+          <a
+            href="https://github.com/EthanHaller/react-dynamic-virtualization"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub ↗
+          </a>
+        </div>
       </header>
 
       <main className="app-main">
@@ -56,30 +71,32 @@ function App() {
           </NavLink>
         </nav>
 
-        <Routes>
-          <Route path="/" element={<Navigate to={`/fixed${search}${hash}`} replace />} />
-          {scenarios.map((scenario) => (
-            <Route
-              key={scenario.id}
-              path={scenario.path}
-              element={
-                <ScenarioExperiment
-                  key={scenario.id}
-                  activeScenario={scenario.id}
-                  {...sandboxConfiguration}
-                />
-              }
-            />
-          ))}
-          <Route path={customizationPath} element={<CustomizationDemo />} />
-          <Route path="*" element={
-            <section className="panel not-found">
-              <h2>Scenario not found</h2>
-              <p>No scenario is available at <code>{pathname}</code>. Choose a scenario above or return to fixed heights.</p>
-              <Link to={`/fixed${search}`}>Go to fixed heights</Link>
-            </section>
-          } />
-        </Routes>
+        <LibraryBuildContext value={libraryBuild}>
+          <Routes>
+            <Route path="/" element={<Navigate to={`/fixed${search}${hash}`} replace />} />
+            {scenarios.map((scenario) => (
+              <Route
+                key={scenario.id}
+                path={scenario.path}
+                element={
+                  <ScenarioExperiment
+                    key={scenario.id}
+                    activeScenario={scenario.id}
+                    {...sandboxConfiguration}
+                  />
+                }
+              />
+            ))}
+            <Route path={customizationPath} element={<CustomizationDemo />} />
+            <Route path="*" element={
+              <section className="panel not-found">
+                <h2>Scenario not found</h2>
+                <p>No scenario is available at <code>{pathname}</code>. Choose a scenario above or return to fixed heights.</p>
+                <Link to={`/fixed${search}`}>Go to fixed heights</Link>
+              </section>
+            } />
+          </Routes>
+        </LibraryBuildContext>
       </main>
     </div>
   )

@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
-import { VirtualizedList } from "../../../../react-dynamic-virtualization/src"
+import { SandboxVirtualizedList } from "../../providers/SandboxVirtualizedList"
 import { SandboxItemBody } from "../../components/SandboxItemBody"
 import { NumberInput } from "../../components/controls/NumberInput"
 import { SelectInput } from "../../components/controls/SelectInput"
@@ -120,7 +120,7 @@ export function CustomizationDemo() {
             data-sizing={sizingMode}
             data-orientation={orientation}
           >
-            <VirtualizedList
+            <SandboxVirtualizedList
               key={estimateMode}
               estimateItemSize={estimateMode === "item-data" ? estimateSizeFromItem : undefined}
               {...viewportDimensions}
