@@ -1,5 +1,5 @@
 import { useRef } from "react"
-import { PositionStore } from "../position/positionStore"
+import { PositionStore, type PositionStoreOptions } from "../position/positionStore"
 
 function areItemIdsEqual(previousIds: string[], nextIds: string[]): boolean {
   if (previousIds === nextIds) {
@@ -19,7 +19,8 @@ function areItemIdsEqual(previousIds: string[], nextIds: string[]): boolean {
   return true
 }
 
-export function usePositionStore(itemIds: string[], gap = 0): PositionStore {
+export function usePositionStore(itemIds: string[], options?: PositionStoreOptions): PositionStore {
+  const gap = options?.gap ?? 0
   const storeRef = useRef<PositionStore | null>(null)
   const itemIdsRef = useRef<string[] | null>(null)
 
@@ -29,7 +30,7 @@ export function usePositionStore(itemIds: string[], gap = 0): PositionStore {
     storeRef.current.gap !== gap ||
     !areItemIdsEqual(itemIdsRef.current, itemIds)
   ) {
-    storeRef.current = new PositionStore(itemIds, storeRef.current?.getSizes(), gap)
+    storeRef.current = new PositionStore(itemIds, storeRef.current?.getSizes(), options)
     itemIdsRef.current = itemIds
   }
 

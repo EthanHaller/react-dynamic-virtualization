@@ -17,6 +17,7 @@ type VirtualizedListProps<T> = ViewportDimensions & {
   paddingStart?: number
   paddingEnd?: number
   className?: string
+  estimateItemSize?: (item: T) => number
   renderItem: (item: T, options: RenderItemOptions) => React.ReactElement
   scrollElementRef?: Ref<HTMLDivElement>
 }
@@ -38,6 +39,7 @@ function ListOnAxis<T>(props: VirtualizedListProps<T>) {
     paddingStart = 0,
     paddingEnd = 0,
     className,
+    estimateItemSize,
     renderItem,
     scrollElementRef,
   } = props
@@ -57,7 +59,10 @@ function ListOnAxis<T>(props: VirtualizedListProps<T>) {
     useMeasureListViewport(scrollDimension, requestedSize, scrollElementRef)
   const itemIds = useMemo(() => items.map(getItemId), [items, getItemId])
 
-  const { positionStore, positionSnapshot } = usePositions(itemIds, gap)
+  const { positionStore, positionSnapshot } = usePositions(itemIds, {
+    gap,
+    estimateItemSizeAtIndex: estimateItemSize && ((index) => estimateItemSize(items[index])),
+  })
 
   const handleMeasure = useCallback(
     (itemId: string, size: number) => {
