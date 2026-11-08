@@ -31,6 +31,15 @@ Attach the provided ref and positioning style to the same item element.
 Horizontal scrolling starts at the left. Changing orientation remounts the
 viewport and its rows, resets the scroll offset, and takes fresh measurements.
 
+## Spacing and viewport styling
+
+Use `gap` for space between items, `paddingStart` for space before the first
+item, and `paddingEnd` for space after the last item. All three default to
+`0` and accept nonnegative pixel values along the scroll axis. The final item
+has no trailing gap. Changing `gap` rebuilds item offsets from cached
+measurements, so set it as a layout value. Pass `className` to style the outer
+scroll container.
+
 ## Development
 
 ```bash

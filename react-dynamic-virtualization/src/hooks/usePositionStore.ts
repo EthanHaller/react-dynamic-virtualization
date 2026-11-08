@@ -19,18 +19,17 @@ function areItemIdsEqual(previousIds: string[], nextIds: string[]): boolean {
   return true
 }
 
-export function usePositionStore(itemIds: string[]): PositionStore {
+export function usePositionStore(itemIds: string[], gap = 0): PositionStore {
   const storeRef = useRef<PositionStore | null>(null)
   const itemIdsRef = useRef<string[] | null>(null)
 
-  if (storeRef.current === null || itemIdsRef.current === null) {
-    storeRef.current = new PositionStore(itemIds)
-    itemIdsRef.current = itemIds
-  } else if (!areItemIdsEqual(itemIdsRef.current, itemIds)) {
-    const previousSizes = storeRef.current.getSizes()
-
-    storeRef.current = new PositionStore(itemIds, previousSizes)
-
+  if (
+    storeRef.current === null ||
+    itemIdsRef.current === null ||
+    storeRef.current.gap !== gap ||
+    !areItemIdsEqual(itemIdsRef.current, itemIds)
+  ) {
+    storeRef.current = new PositionStore(itemIds, storeRef.current?.getSizes(), gap)
     itemIdsRef.current = itemIds
   }
 

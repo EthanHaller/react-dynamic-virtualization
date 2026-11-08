@@ -19,7 +19,7 @@ describe("usePositionStore", () => {
     expect(snapshot.getTotalSize()).toBe(150)
   })
 
-  it("builds positions when an initially empty list receives items", () => {
+  it("builds positions for items inserted into an empty list", () => {
     const { result, rerender } = renderHook(
       ({ itemIds }) => usePositionStore(itemIds),
       { initialProps: { itemIds: [] as string[] } },
@@ -42,7 +42,7 @@ describe("usePositionStore", () => {
     expect(snapshot.getIndexAtPosition(50)).toBe(1)
   })
 
-  it("retains measurements applied after rebuilding across subsequent rerenders", () => {
+  it("retains measurements across item changes and rerenders", () => {
     const { result, rerender } = renderHook(
       ({ itemIds }) => usePositionStore(itemIds),
       { initialProps: { itemIds: ["a", "b"] } },
@@ -72,7 +72,7 @@ describe("usePositionStore", () => {
     expect(snapshot.getTotalSize()).toBe(250)
   })
 
-  it("preserves the store and measured sizes without reading unchanged IDs", () => {
+  it("reuses the store and measurements by item ID array identity", () => {
     let indexedIdReads = 0
     let lengthReads = 0
     const itemIds = new Proxy(["a", "b", "c"], {
@@ -105,7 +105,7 @@ describe("usePositionStore", () => {
     expect(result.current.getSnapshot().getTotalSize()).toBe(180)
   })
 
-  it("preserves the store and measured sizes for a new array of equal IDs", () => {
+  it("reuses the store and measurements for equal item ID sequences", () => {
     const { result, rerender } = renderHook(
       ({ itemIds }) => usePositionStore(itemIds),
       { initialProps: { itemIds: ["a", "b", "c"] } },
@@ -158,7 +158,7 @@ describe("usePositionStore", () => {
       expectedPositions: [],
       expectedTotalSize: 0,
     },
-  ])("rebuilds positions when IDs are $change, retaining sizes by ID", ({
+  ])("rebuilds positions and retains sizes by ID when items are $change", ({
     itemIds,
     expectedSizes,
     expectedPositions,

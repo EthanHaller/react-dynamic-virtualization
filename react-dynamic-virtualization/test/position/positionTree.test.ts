@@ -85,7 +85,7 @@ describe("PositionTree", () => {
       expect(tree.getTotalSize()).toBe(115)
     })
 
-    it("does not update the positions of preceding items", () => {
+    it("preserves preceding item positions when an item resizes", () => {
       const tree = createTree()
 
       tree.updateSize("c", 10)
@@ -105,7 +105,7 @@ describe("PositionTree", () => {
       expect(tree.getTotalSize()).toBe(95)
     })
 
-    it("does nothing when the size difference is zero", () => {
+    it("preserves positions and total size for a zero size difference", () => {
       const tree = createTree()
 
       tree.updateSize("b", 0)
@@ -130,7 +130,7 @@ describe("PositionTree", () => {
       )
     })
 
-    it("throws when itemIds are not unique", () => {
+    it("rejects duplicate item IDs", () => {
       expect(() => new PositionTree(["a", "a"], [10, 20])).toThrow(
         "itemIds must be unique",
       )

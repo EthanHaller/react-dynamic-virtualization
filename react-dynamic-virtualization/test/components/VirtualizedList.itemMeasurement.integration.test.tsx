@@ -162,7 +162,7 @@ describe("VirtualizedList item measurement", () => {
     expect(observer.observe).toHaveBeenCalledWith(screen.getByTestId("item-3"))
   })
 
-  it("does not update positions when the measured height is unchanged", () => {
+  it("preserves item positions for repeated height measurements", () => {
     const items: Item[] = [
       { id: "item-1", name: "Item 1" },
       { id: "item-2", name: "Item 2" },
