@@ -1,8 +1,9 @@
 # Dynamic-height performance comparison
 
-React Dynamic Virtualization used **50–55% less main-thread task time** and
-**70–72% less JavaScript execution time** than TanStack Virtual in this workload.
-At 20× CPU slowdown, RDV completed the same 200 updates **28% sooner**.
+The published React Dynamic Virtualization `1.1.0` package used **48% less
+main-thread task time** and **72% less JavaScript time** than TanStack Virtual
+in the unthrottled Changing heights workload. Both providers completed the
+same 200 updates at essentially the same pace.
 
 ## Workload
 
@@ -15,7 +16,37 @@ Both providers use the same row content, overscan of two items, and a 600px-tall
 list viewport with 1,022px content width. TanStack uses its existing 80px height
 estimate. The first four rows stay mounted and visible throughout the comparison.
 
-## Results
+## Published 1.1.0 verification
+
+The table reports means across 10 measured runs per provider at normal CPU
+speed. One warm-up run per provider was excluded, and provider order
+alternated between pairs. RDV used less main-thread and JavaScript time in
+every measured pair.
+
+| Mean per run | RDV 1.1.0 | TanStack Virtual 3.14.13 |
+| --- | ---: | ---: |
+| Main-thread task time | 1,143 ms | 2,186 ms |
+| JavaScript time | 366 ms | 1,294 ms |
+| Time to complete 200 updates | 20.415 s | 20.417 s |
+
+The production sandbox ran in headless Chrome 156.0.8078.80 on macOS 15.5
+arm64 at a browser viewport of 1,368 × 950 CSS pixels. It used React 19.2.8
+and TanStack virtual-core 3.17.11. **Use local build** was off, so the RDV
+provider loaded the published npm package.
+
+Main-thread task time and JavaScript time are deltas from Chrome DevTools
+Protocol's `Performance.getMetrics` counters `TaskDuration` and
+`ScriptDuration`. Counters were sampled just before **Start run** and roughly
+500 ms after completion was detected. Completion time comes from the
+workload's start and end marks. This run uses counter means, while the
+original comparison below uses trace medians. Compare providers within
+each method.
+
+## Original trace results
+
+The original trace runs showed **50–55% less main-thread task time** and
+**70–72% less JavaScript execution time** for RDV. At 20× CPU slowdown, RDV
+completed the same 200 updates **28% sooner**.
 
 The table reports median times. Each provider receives one warm-up run before
 measurement, and provider order alternates between pairs.
@@ -47,7 +78,7 @@ how many main-thread tasks exceeded 50ms in each run.
 Rendering and painting measurements cover the renderer's main thread. At 20×
 slowdown, RDV completed the workload with fewer long tasks and a higher update rate.
 
-## Reproduce the comparison
+## Reproduce the original trace comparison
 
 1. Run `npm run build` and `npm run preview` from the sandbox directory.
 2. Open `/changing?itemCount=100000&payloadUpdateBatchSize=4` and select a provider.
