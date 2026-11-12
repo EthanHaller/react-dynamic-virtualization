@@ -124,6 +124,10 @@ export function createPayloadUpdateRun() {
     startRun,
     stopRun,
     resetExperiment,
+    setManualPayloads(payloads: PayloadUpdateBatch) {
+      if (runDiagnostics.status === "Running" || recordPayloads === payloads) return
+      updateRecordPayloads(payloads)
+    },
     getRunDiagnostics: () => runDiagnostics,
     subscribeToRunDiagnostics(subscriber: () => void) {
       diagnosticSubscribers.add(subscriber)

@@ -5,6 +5,9 @@ main-thread task time** and **72% less JavaScript time** than TanStack Virtual
 in the unthrottled Changing heights workload. Both providers completed the
 same 200 updates at essentially the same pace.
 
+The [single-row expansion benchmark](benchmarks/single-row-expansion/README.md)
+measures one click in smaller lists and reports its own results.
+
 ## Workload
 
 The sandbox's **Changing heights** scenario renders 100,000 event records. The

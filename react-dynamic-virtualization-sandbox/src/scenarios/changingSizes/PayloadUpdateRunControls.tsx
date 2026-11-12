@@ -1,21 +1,47 @@
-import { useSyncExternalStore } from "react"
+import { useMemo, useSyncExternalStore } from "react"
 import { DiagnosticValue } from "../../components/diagnostics/DiagnosticsPanel"
-import { payloadUpdateBatchCount } from "./createPayloadWorkload"
+import { createPayloadWorkload, payloadUpdateBatchCount } from "./createPayloadWorkload"
 import type { PayloadUpdateRun } from "./createPayloadUpdateRun"
 
 type PayloadUpdateRunControlsProps = {
   payloadUpdateRun: PayloadUpdateRun
   startRun: () => void
+  workloadSeed: number
+  payloadUpdateBatchSize: number
 }
 
-export function PayloadUpdateRunControls({ payloadUpdateRun, startRun }: PayloadUpdateRunControlsProps) {
+export function PayloadUpdateRunControls({
+  payloadUpdateRun,
+  startRun,
+  workloadSeed,
+  payloadUpdateBatchSize,
+}: PayloadUpdateRunControlsProps) {
   const runStatus = useSyncExternalStore(
     payloadUpdateRun.subscribeToRunDiagnostics,
     () => payloadUpdateRun.getRunDiagnostics().status,
   )
 
+  const [expandedPayloads] = useMemo(
+    () => createPayloadWorkload(workloadSeed, payloadUpdateBatchSize, 1),
+    [workloadSeed, payloadUpdateBatchSize],
+  )
+
   return (
     <div className="payload-update-controls">
+      <button
+        type="button"
+        disabled={runStatus === "Running"}
+        onClick={() => payloadUpdateRun.setManualPayloads(expandedPayloads)}
+      >
+        Expand payloads
+      </button>
+      <button
+        type="button"
+        disabled={runStatus === "Running"}
+        onClick={() => payloadUpdateRun.setManualPayloads([])}
+      >
+        Collapse payloads
+      </button>
       <button type="button" onClick={startRun}>Start run</button>
       <button
         type="button"
@@ -26,8 +52,7 @@ export function PayloadUpdateRunControls({ payloadUpdateRun, startRun }: Payload
         Stop run
       </button>
       <p className="control-description">
-        Start resets the list. Stop keeps the current payloads for inspection.
-        Keep the changing rows visible when comparing providers.
+        Use Expand or Collapse for a single interaction. Start run schedules a series of updates.
       </p>
     </div>
   )

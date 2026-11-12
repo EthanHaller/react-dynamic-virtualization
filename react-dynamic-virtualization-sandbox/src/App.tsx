@@ -203,6 +203,8 @@ function ScenarioExperiment({
             experimentActions={payloadUpdateRun && !unsupportedReason && (
               <PayloadUpdateRunControls
                 payloadUpdateRun={payloadUpdateRun}
+                workloadSeed={config.workloadSeed}
+                payloadUpdateBatchSize={config.payloadUpdateBatchSize}
                 startRun={() => activeExperimentRef.current?.startRun?.()}
               />
             )}

@@ -22,10 +22,14 @@ function createSeededRandom(seed: number) {
   }
 }
 
-export function createPayloadWorkload(seed: number, recordsPerUpdate: number): readonly PayloadUpdateBatch[] {
+export function createPayloadWorkload(
+  seed: number,
+  recordsPerUpdate: number,
+  batchCount = payloadUpdateBatchCount,
+): readonly PayloadUpdateBatch[] {
   const nextRandomValue = createSeededRandom(seed)
 
-  return Array.from({ length: payloadUpdateBatchCount }, (_, batchIndex) => {
+  return Array.from({ length: batchCount }, (_, batchIndex) => {
     const expandsPayloads = batchIndex % 2 === 0
 
     return Array.from({ length: recordsPerUpdate }, () => {

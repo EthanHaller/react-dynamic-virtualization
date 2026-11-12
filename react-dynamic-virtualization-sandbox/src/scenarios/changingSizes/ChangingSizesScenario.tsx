@@ -47,8 +47,8 @@ export function ChangingSizesScenario({
       <div className="changing-sizes-help">
         <strong>Compare providers when content near the top changes height.</strong>
         <p>
-          Start run expands and collapses payload details in the {config.payloadUpdateBatchSize === 1 ? "first row" : `first ${config.payloadUpdateBatchSize} rows`}
-          {" "}every {config.payloadUpdateInterval}ms for {payloadUpdateBatchCount} updates.
+          Expand or collapse payload details in the {config.payloadUpdateBatchSize === 1 ? "first row" : `first ${config.payloadUpdateBatchSize} rows`}
+          {". "}Start run repeats this every {config.payloadUpdateInterval}ms for {payloadUpdateBatchCount} updates.
           Watch the rows below stay aligned as the payloads grow and shrink.
         </p>
       </div>
